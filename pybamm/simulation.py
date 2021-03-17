@@ -667,7 +667,7 @@ class Simulation:
             if starting_solution is None:
                 starting_solution_cycles = []
             else:
-                starting_solution_cycles = starting_solution.cycles
+                starting_solution_cycles = starting_solution.cycles.copy()
 
             cycle_offset = len(starting_solution_cycles)
             all_cycle_solutions = starting_solution_cycles
@@ -831,6 +831,8 @@ class Simulation:
         self.quick_plot = pybamm.dynamic_plot(
             self._solution, output_variables=output_variables, **kwargs
         )
+
+        return self.quick_plot
 
     @property
     def model(self):
