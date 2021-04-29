@@ -156,8 +156,12 @@ for file_ext in ["*.csv", "*.py", "*.md", "*.txt"]:
     )
 pybamm_data.append("./version")
 pybamm_data.append("./CITATIONS.txt")
+pybamm_data.append("./plotting/pybamm.mplstyle")
 
-idaklu_ext = Extension("idaklu", ["pybamm/solvers/c_solvers/idaklu.cpp"])
+idaklu_ext = Extension(
+    "pybamm.solvers.idaklu",
+    ["pybamm/solvers/c_solvers/idaklu.cpp"]
+)
 ext_modules = [idaklu_ext] if compile_KLU() else []
 
 jax_dependencies = []
