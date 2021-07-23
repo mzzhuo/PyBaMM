@@ -1,11 +1,15 @@
 #
 # Tests for the Unary Operator classes
 #
-import pybamm
-
 import unittest
+
 import numpy as np
+import sympy
 from scipy.sparse import diags
+from sympy.vector.operators import Divergence as sympy_Divergence
+from sympy.vector.operators import Gradient as sympy_Gradient
+
+import pybamm
 
 
 class TestUnaryOperators(unittest.TestCase):
@@ -31,6 +35,23 @@ class TestUnaryOperators(unittest.TestCase):
         negb = pybamm.Negate(b)
         self.assertEqual(negb.evaluate(), -4)
 
+        # Test broadcast gets switched
+        broad_a = pybamm.PrimaryBroadcast(a, "test")
+        neg_broad = -broad_a
+        self.assertEqual(neg_broad.id, pybamm.PrimaryBroadcast(nega, "test").id)
+
+        broad_a = pybamm.FullBroadcast(a, "test", "test2")
+        neg_broad = -broad_a
+        self.assertEqual(neg_broad.id, pybamm.FullBroadcast(nega, "test", "test2").id)
+
+        # Test recursion
+        broad_a = pybamm.PrimaryBroadcast(pybamm.PrimaryBroadcast(a, "test"), "test2")
+        neg_broad = -broad_a
+        self.assertEqual(
+            neg_broad.id,
+            pybamm.PrimaryBroadcast(pybamm.PrimaryBroadcast(nega, "test"), "test2").id,
+        )
+
     def test_absolute(self):
         a = pybamm.Symbol("a")
         absa = pybamm.AbsoluteValue(a)
@@ -40,6 +61,23 @@ class TestUnaryOperators(unittest.TestCase):
         b = pybamm.Scalar(-4)
         absb = pybamm.AbsoluteValue(b)
         self.assertEqual(absb.evaluate(), 4)
+
+        # Test broadcast gets switched
+        broad_a = pybamm.PrimaryBroadcast(a, "test")
+        abs_broad = abs(broad_a)
+        self.assertEqual(abs_broad.id, pybamm.PrimaryBroadcast(absa, "test").id)
+
+        broad_a = pybamm.FullBroadcast(a, "test", "test2")
+        abs_broad = abs(broad_a)
+        self.assertEqual(abs_broad.id, pybamm.FullBroadcast(absa, "test", "test2").id)
+
+        # Test recursion
+        broad_a = pybamm.PrimaryBroadcast(pybamm.PrimaryBroadcast(a, "test"), "test2")
+        abs_broad = abs(broad_a)
+        self.assertEqual(
+            abs_broad.id,
+            pybamm.PrimaryBroadcast(pybamm.PrimaryBroadcast(absa, "test"), "test2").id,
+        )
 
     def test_smooth_absolute_value(self):
         a = pybamm.StateVector(slice(0, 1))
@@ -146,6 +184,17 @@ class TestUnaryOperators(unittest.TestCase):
         a = pybamm.Symbol("a", domain="test domain")
         div = pybamm.Divergence(pybamm.Gradient(a))
         self.assertEqual(div.domain, a.domain)
+
+        # check div commutes with negation
+        a = pybamm.Symbol("a", domain="test domain")
+        div = pybamm.div(-pybamm.Gradient(a))
+        self.assertEqual(div.id, (-pybamm.Divergence(pybamm.Gradient(a))).id)
+
+        div = pybamm.div(-a * pybamm.Gradient(a))
+        self.assertEqual(div.id, (-pybamm.Divergence(a * pybamm.Gradient(a))).id)
+
+        # div = pybamm.div(a * -pybamm.Gradient(a))
+        # self.assertEqual(div.id, (-pybamm.Divergence(a * pybamm.Gradient(a))).id)
 
     def test_integral(self):
         # space integral
@@ -386,7 +435,7 @@ class TestUnaryOperators(unittest.TestCase):
         a = pybamm.StateVector(slice(0, 10), domain="test")
         self.assertFalse(pybamm.Index(a, slice(1)).evaluates_on_edges("primary"))
         self.assertFalse(pybamm.Laplacian(a).evaluates_on_edges("primary"))
-        self.assertTrue(pybamm.Gradient_Squared(a).evaluates_on_edges("primary"))
+        self.assertFalse(pybamm.GradientSquared(a).evaluates_on_edges("primary"))
         self.assertFalse(pybamm.BoundaryIntegral(a).evaluates_on_edges("primary"))
         self.assertTrue(pybamm.Upwind(a).evaluates_on_edges("primary"))
         self.assertTrue(pybamm.Downwind(a).evaluates_on_edges("primary"))
@@ -432,6 +481,14 @@ class TestUnaryOperators(unittest.TestCase):
             pybamm.boundary_value(var, "negative tab")
             pybamm.boundary_value(var, "positive tab")
 
+        # boundary value of symbol that evaluates on edges raises error
+        symbol_on_edges = pybamm.PrimaryBroadcastToEdges(1, "domain")
+        with self.assertRaisesRegex(
+            ValueError,
+            "Can't take the boundary value of a symbol that evaluates on edges",
+        ):
+            pybamm.boundary_value(symbol_on_edges, "right")
+
     def test_x_average(self):
         a = pybamm.Scalar(4)
         average_a = pybamm.x_average(a)
@@ -454,7 +511,7 @@ class TestUnaryOperators(unittest.TestCase):
         self.assertEqual(average_t_broad_a.id, (pybamm.t * pybamm.Scalar(4)).id)
 
         # x-average of concatenation of broadcasts
-        conc_broad = pybamm.Concatenation(
+        conc_broad = pybamm.concatenation(
             pybamm.PrimaryBroadcast(1, ["negative electrode"]),
             pybamm.PrimaryBroadcast(2, ["separator"]),
             pybamm.PrimaryBroadcast(3, ["positive electrode"]),
@@ -463,7 +520,7 @@ class TestUnaryOperators(unittest.TestCase):
         self.assertIsInstance(average_conc_broad, pybamm.Division)
         self.assertEqual(average_conc_broad.domain, [])
         # with auxiliary domains
-        conc_broad = pybamm.Concatenation(
+        conc_broad = pybamm.concatenation(
             pybamm.FullBroadcast(
                 1,
                 ["negative electrode"],
@@ -481,7 +538,7 @@ class TestUnaryOperators(unittest.TestCase):
         average_conc_broad = pybamm.x_average(conc_broad)
         self.assertIsInstance(average_conc_broad, pybamm.PrimaryBroadcast)
         self.assertEqual(average_conc_broad.domain, ["current collector"])
-        conc_broad = pybamm.Concatenation(
+        conc_broad = pybamm.concatenation(
             pybamm.FullBroadcast(
                 1,
                 ["negative electrode"],
@@ -513,11 +570,7 @@ class TestUnaryOperators(unittest.TestCase):
         self.assertEqual(average_conc_broad.auxiliary_domains, {"secondary": ["test"]})
 
         # x-average of broadcast
-        for domain in [
-            ["negative electrode"],
-            ["separator"],
-            ["positive electrode"],
-        ]:
+        for domain in [["negative electrode"], ["separator"], ["positive electrode"]]:
             a = pybamm.Variable("a", domain=domain)
             x = pybamm.SpatialVariable("x", domain)
             av_a = pybamm.x_average(a)
@@ -693,6 +746,41 @@ class TestUnaryOperators(unittest.TestCase):
         self.assertEqual(a.jac(pybamm.StateVector(slice(0, 1))).evaluate(), 0)
         self.assertFalse(a.is_constant())
         self.assertFalse((2 * a).is_constant())
+
+    def test_to_equation(self):
+        a = pybamm.Symbol("a", domain="negative particle")
+        b = pybamm.Symbol("b", domain="current collector")
+        c = pybamm.Symbol("c", domain="test")
+
+        # Test print_name
+        pybamm.Floor.print_name = "test"
+        self.assertEqual(pybamm.Floor(-2.5).to_equation(), sympy.symbols("test"))
+
+        # Test Negate
+        self.assertEqual(pybamm.Negate(4).to_equation(), -4.0)
+
+        # Test AbsoluteValue
+        self.assertEqual(pybamm.AbsoluteValue(-4).to_equation(), 4.0)
+
+        # Test Gradient
+        self.assertEqual(pybamm.Gradient(a).to_equation(), sympy_Gradient("a"))
+
+        # Test Divergence
+        self.assertEqual(
+            pybamm.Divergence(pybamm.Gradient(a)).to_equation(),
+            sympy_Divergence(sympy_Gradient(a)),
+        )
+
+        # Test BoundaryValue
+        self.assertEqual(
+            pybamm.BoundaryValue(a, "right").to_equation(), sympy.symbols("a^{surf}")
+        )
+        self.assertEqual(
+            pybamm.BoundaryValue(b, "positive tab").to_equation(), sympy.symbols(str(b))
+        )
+        self.assertEqual(
+            pybamm.BoundaryValue(c, "left").to_equation(), sympy.symbols("c^{left}")
+        )
 
 
 if __name__ == "__main__":

@@ -8,11 +8,15 @@ import numpy as np
 
 
 class TestDimensionlessParameterValues(unittest.TestCase):
-    def test_options(self):
-        with self.assertRaisesRegex(pybamm.OptionError, "particle shape"):
-            pybamm.LithiumIonParameters({"particle shape": "bad shape"})
-        with self.assertRaisesRegex(pybamm.OptionError, "particle cracking"):
-            pybamm.LithiumIonParameters({"particle cracking": "bad crack"})
+    def test_print_parameters(self):
+        parameters = pybamm.LithiumIonParameters()
+        parameter_values = pybamm.lithium_ion.BaseModel().default_parameter_values
+        output_file = "lithium_ion_parameters.txt"
+        parameter_values.print_parameters(parameters, output_file)
+        # test print_parameters with dict and without C-rate
+        del parameter_values["Nominal cell capacity [A.h]"]
+        parameters = {"C_e": parameters.C_e, "sigma_n": parameters.sigma_n}
+        parameter_values.print_parameters(parameters)
 
     def test_lithium_ion(self):
         """This test checks that all the dimensionless parameters are being calculated
