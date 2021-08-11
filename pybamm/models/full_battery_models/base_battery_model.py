@@ -3,7 +3,6 @@
 #
 
 import pybamm
-import warnings
 
 
 class BatteryModelOptions(pybamm.FuzzyDict):
@@ -73,6 +72,10 @@ class BatteryModelOptions(pybamm.FuzzyDict):
                 (default), "user" or "no particles". For the "user" option the surface
                 area per unit volume can be passed as a parameter, and is therefore not
                 necessarily consistent with the particle shape.
+            * "particle size" : str
+                Sets the model to include a single active particle size or a
+                distribution of sizes at any macroscale location. Can be "single"
+                (default) or "distribution". Option applies to both electrodes.
             * "particle mechanics" : str
                 Sets the model to account for mechanical effects such as particle
                 swelling and cracking. Can be "none" (default), "swelling only",
@@ -171,6 +174,7 @@ class BatteryModelOptions(pybamm.FuzzyDict):
             ],
             "particle mechanics": ["none", "swelling only", "swelling and cracking"],
             "particle shape": ["spherical", "user", "no particles"],
+            "particle size": ["single", "distribution"],
             "SEI": [
                 "none",
                 "constant",
@@ -203,6 +207,7 @@ class BatteryModelOptions(pybamm.FuzzyDict):
             "particle": "Fickian diffusion",
             "particle mechanics": "none",
             "particle shape": "spherical",
+            "particle size": "single",
             "SEI": "none",
             "SEI porosity change": "false",
             "surface form": "false",
@@ -276,6 +281,33 @@ class BatteryModelOptions(pybamm.FuzzyDict):
                     "current density as a state' must be 'true'"
                 )
 
+        # Options not yet compatible with particle-size distributions
+        if options["particle size"] == "distribution":
+            if options["SEI"] != "none":
+                raise NotImplementedError(
+                    "SEI submodels do not yet support particle-size distributions."
+                )
+            if options["lithium plating"] != "none":
+                raise NotImplementedError(
+                    "Lithium plating submodels do not yet support particle-size "
+                    "distributions."
+                )
+            if options["particle mechanics"] != "none":
+                raise NotImplementedError(
+                    "Particle mechanics submodels do not yet support particle-size"
+                    " distributions."
+                )
+            if options["particle shape"] != "spherical":
+                raise NotImplementedError(
+                    "Particle shape must be 'spherical' for particle-size distributions"
+                    " submodels."
+                )
+            if options["thermal"] == "x-full":
+                raise NotImplementedError(
+                    "X-full thermal submodels do not yet support particle-size"
+                    " distributions."
+                )
+
         # Some standard checks to make sure options are compatible
         if options["SEI porosity change"] in [True, False]:
             raise pybamm.OptionError(
@@ -297,12 +329,6 @@ class BatteryModelOptions(pybamm.FuzzyDict):
             raise NotImplementedError(
                 "The 'fast diffusion' option has been renamed. "
                 "Use 'uniform profile' instead."
-            )
-
-        if options["thermal"] == "x-lumped" and options["dimensionality"] == 1:
-            warnings.warn(
-                "1+1D Thermal models are only valid if both tabs are "
-                "placed at the top of the cell."
             )
 
         for option, value in options.items():
@@ -383,6 +409,7 @@ class BaseBatteryModel(pybamm.BaseModel):
     @property
     def default_geometry(self):
         return pybamm.battery_geometry(
+            options=self.options,
             current_collector_dimension=self.options["dimensionality"]
         )
 
@@ -397,6 +424,8 @@ class BaseBatteryModel(pybamm.BaseModel):
             var.r_p: 30,
             var.y: 10,
             var.z: 10,
+            var.R_n: 30,
+            var.R_p: 30,
         }
         # Reduce the default points for 2D current collectors
         if self.options["dimensionality"] == 2:
@@ -411,6 +440,12 @@ class BaseBatteryModel(pybamm.BaseModel):
             "positive electrode": pybamm.MeshGenerator(pybamm.Uniform1DSubMesh),
             "negative particle": pybamm.MeshGenerator(pybamm.Uniform1DSubMesh),
             "positive particle": pybamm.MeshGenerator(pybamm.Uniform1DSubMesh),
+            "negative particle size": pybamm.MeshGenerator(
+                pybamm.Uniform1DSubMesh
+            ),
+            "positive particle size": pybamm.MeshGenerator(
+                pybamm.Uniform1DSubMesh
+            ),
         }
         if self.options["dimensionality"] == 0:
             base_submeshes["current collector"] = pybamm.MeshGenerator(pybamm.SubMesh0D)
@@ -430,6 +465,8 @@ class BaseBatteryModel(pybamm.BaseModel):
             "macroscale": pybamm.FiniteVolume(),
             "negative particle": pybamm.FiniteVolume(),
             "positive particle": pybamm.FiniteVolume(),
+            "negative particle size": pybamm.FiniteVolume(),
+            "positive particle size": pybamm.FiniteVolume(),
         }
         if self.options["dimensionality"] == 0:
             # 0D submesh - use base spatial method
