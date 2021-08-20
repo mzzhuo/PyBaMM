@@ -112,3 +112,6 @@ test.c
 
 # vcpkg
 vcpkg_installed/
+
+# spider
+.spyproject/
