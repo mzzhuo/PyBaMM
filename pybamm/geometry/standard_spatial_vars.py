@@ -139,3 +139,21 @@ R_p_edge = pybamm.SpatialVariableEdge(
     },
     coord_sys="cartesian",
 )
+
+# spatial variables for PE degradation submodel
+# only primary domain given for specifying default_geometry
+# and default_var_pts
+# so that it's general for both SPM and DFN
+# see base_phase_transition.py for more precise/correct definitions
+eta = pybamm.SpatialVariable(
+    "eta", 
+    domain=["positive core"]
+)
+chi = pybamm.SpatialVariable(
+    "chi", 
+    domain=["positive shell"]
+)
+psi = pybamm.SpatialVariable(
+    "psi", 
+    domain=["positive shell oxygen"]
+)
