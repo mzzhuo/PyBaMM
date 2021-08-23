@@ -32,6 +32,16 @@ class BaseModel(pybamm.BaseBatteryModel):
             "current collector y": self.param.L_z,
             "current collector z": self.param.L_z,
         }
+        # update length_scales
+        if self.options["PE phase transition"] in ["yes", "on"]:
+            self.length_scales.update(
+                {
+                    "positive core": self.param.R_p_typ,
+                    "positive shell": self.param.R_p_typ,
+                    "positive shell oxygen": self.param.R_p_typ,
+                }
+            )
+
         self.set_standard_output_variables()
 
     def set_standard_output_variables(self):
