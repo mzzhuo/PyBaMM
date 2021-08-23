@@ -1469,6 +1469,9 @@ def r_average(symbol):
     # its r-averaged value is itself
     elif symbol.domain not in [
         ["positive particle"],
+        ["positive core"],
+        ["positive shell"],
+        ["positive shell oxygen"],
         ["negative particle"],
         ["working particle"],
     ]:
@@ -1486,10 +1489,23 @@ def r_average(symbol):
     # If symbol is a Broadcast onto a particle domain, its average value is its child
     elif isinstance(symbol, pybamm.PrimaryBroadcast) and symbol.domain in [
         ["positive particle"],
+        ["positive core"],
+        ["positive shell"],
+        ["positive shell oxygen"],
         ["negative particle"],
         ["working particle"],
     ]:
         return symbol.orphans[0]
+    elif symbol.domain in [
+        ["positive core"],
+        ["positive shell"],
+        ["positive shell oxygen"],
+    ]:
+        r = pybamm.SpatialVariable("eta", symbol.domain)
+        v = pybamm.FullBroadcast(
+            pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
+        )
+        return Integral(symbol, r) / Integral(v, r)
     else:
         r = pybamm.SpatialVariable("r", symbol.domain)
         v = pybamm.FullBroadcast(
