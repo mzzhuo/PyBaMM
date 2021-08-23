@@ -1349,10 +1349,13 @@ def x_average(symbol):
         ):
             x = pybamm.standard_spatial_vars.x_n
             l = geo.l_n
-        elif (
-            symbol.domain == ["positive particle"] or
-            symbol.domain == ["positive particle size"]
-        ):
+        elif symbol.domain in [
+            ["positive particle"],
+            ["positive core"],
+            ["positive shell"],
+            ["positive shell oxygen"],
+            ["positive particle size"]
+        ]:
             x = pybamm.standard_spatial_vars.x_p
             l = geo.l_p
         else:
