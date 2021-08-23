@@ -52,6 +52,7 @@ class SPM(BaseModel):
 
         self.set_sei_submodel()
         self.set_lithium_plating_submodel()
+        self.set_phase_transition_submodel()
 
         if build:
             self.build_model()
@@ -97,6 +98,7 @@ class SPM(BaseModel):
             )
 
     def set_particle_submodel(self):
+
         if isinstance(self.options["particle"], str):
             particle_left = self.options["particle"]
             particle_right = self.options["particle"]
@@ -119,6 +121,24 @@ class SPM(BaseModel):
                     domain.lower() + " particle"
                 ] = pybamm.particle.PolynomialSingleParticle(
                     self.param, domain, particle_side
+                )
+
+    def set_phase_transition_submodel(self):
+
+        if self.options["PE phase transition"] in ["yes", "on"]:
+            # replace the fickian particle submodel for PE 
+            # make sure set_phase_transition_submodel comes after
+            # set_particle_submodel
+            if "positive particle" in self.submodels:
+                self.submodels[
+                    "positive particle"
+                ] = pybamm.phase_transition.PhaseTransitionSingleParticle(
+                    self.param, "Positive"
+                )
+            else:
+                raise pybamm.ModelError(
+                    "The particle submodel has not been called yet. Make sure it is invoked before "
+                    "calling phase transition submodel."
                 )
 
     def set_negative_electrode_submodel(self):
