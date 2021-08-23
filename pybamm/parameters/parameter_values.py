@@ -158,6 +158,10 @@ class ParameterValues:
         if "lithium plating" in chemistry:
             component_groups += ["lithium plating"]
 
+        # add PE degradation parameters if provided
+        if "pe degradation" in chemistry:
+            component_groups += ["pe degradation"]
+
         if "anode" in chemistry.keys():
             if "negative electrode" in chemistry.keys():
                 raise KeyError(
