@@ -306,6 +306,9 @@ class ProcessedVariable(object):
         if self.domain[0] in [
             "negative particle",
             "positive particle",
+            "positive core",
+            "positive shell",
+            "positive shell oxygen",
             "working particle",
         ] and self.auxiliary_domains["secondary"][0] in [
             "negative electrode",
