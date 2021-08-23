@@ -117,6 +117,9 @@ class PrimaryBroadcast(Broadcast):
             "positive particle size",
             "negative particle",
             "positive particle",
+            "positive core",
+            "positive shell",
+            "positive shell oxygen",
         ]:
             raise pybamm.DomainError(
                 """Primary broadcast from current collector domain must be to electrode
@@ -132,6 +135,9 @@ class PrimaryBroadcast(Broadcast):
             and broadcast_domain[0] not in [
                 "negative particle",
                 "positive particle",
+                "positive core",
+                "positive shell",
+                "positive shell oxygen",
                 "negative particle size",
                 "positive particle size",
             ]
