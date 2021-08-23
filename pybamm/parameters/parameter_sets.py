@@ -120,6 +120,7 @@ Marquis2019 = {
     "electrolyte": "lipf6_Marquis2019",
     "experiment": "1C_discharge_from_full_Marquis2019",
     "sei": "example",
+    "pe degradation": "example",
     "citation": "Marquis2019",
 }
 
