@@ -117,6 +117,12 @@ class SpatialVariable(IndependentVariable):
             raise pybamm.DomainError(
                 "domain cannot be particle if name is '{}'".format(name)
             )
+        # reserve Greek letters eta chi and psi for PE degradation submodel domains
+        elif name in ["eta", "chi", "psi"] and not (len(domain) == 1 and "positive" in domain[0]):
+            raise pybamm.DomainError(
+                "domain must be positive core, shell (oxygen) if name is 'eta', 'chi', or 'psi'."
+            )
+
 
     def create_copy(self):
         """See :meth:`pybamm.Symbol.new_copy()`."""
