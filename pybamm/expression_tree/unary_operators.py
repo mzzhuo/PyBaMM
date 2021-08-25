@@ -1504,11 +1504,10 @@ def r_average(symbol):
         ["positive shell"],
         ["positive shell oxygen"],
     ]:
-        r = pybamm.SpatialVariable("eta", symbol.domain)
-        v = pybamm.FullBroadcast(
-            pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
+        raise pybamm.DomainError(
+                "r_average implementation for domain 'positive core or shell (oxygen)'"
+                " is in submodel base_phase_transition.py"
         )
-        return Integral(symbol, r) / Integral(v, r)
     else:
         r = pybamm.SpatialVariable("r", symbol.domain)
         v = pybamm.FullBroadcast(
