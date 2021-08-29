@@ -1,3 +1,15 @@
+@article{Ghosh2021,
+  doi = {10.1149/1945-7111/abdc71},
+  year = {2021},
+  publisher = {The Electrochemical Society},
+  volume = {168},
+  number = {2},
+  pages = {020509},
+  author = {Abir Ghosh and Jamie M. Foster and Gregory Offer and Monica Marinescu},
+  title = {A Shrinking-Core Model for the Degradation of High-Nickel Cathodes ({NMC}811) in Li-Ion Batteries: Passivation Layer Growth and Oxygen Evolution},
+  journal = {Journal of the Electrochemical Society}
+}
+
 @article{Andersson2019,
   author = {Andersson, Joel A. E. and Gillis, Joris and Horn, Greg
             and Rawlings, James B. and Diehl, Moritz},
