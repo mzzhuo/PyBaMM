@@ -406,6 +406,9 @@ class BaseBatteryModel(pybamm.BaseModel):
     def default_parameter_values(self):
         # Default parameter values
         # Lion parameters left as default parameter set for tests
+        base_chemistry = pybamm.parameter_sets.Marquis2019
+        if self.options["PE phase transition"] in ["yes", "on"]:
+            base_chemistry = pybamm.parameter_sets.Zhuo2021
         return pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Marquis2019)
 
     @property
