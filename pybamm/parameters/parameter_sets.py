@@ -124,6 +124,20 @@ Marquis2019 = {
     "citation": "Marquis2019",
 }
 
+Zhuo2021 = {
+    "chemistry": "lithium_ion",
+    "cell": "18650_Sturm2019",
+    "negative electrode": "SiC_Ghosh2021",
+    "separator": "separator_Sturm2019",
+    "positive electrode": "NMC811_Ghosh2021",
+    # "electrolyte": "lipf6_Nyman2008",
+    "electrolyte": "lipf6_Marquis2019",
+    # "experiment": "1C_discharge_from_full_Ghosh2021",
+    "experiment": "1C_charge_from_empty_Ghosh2021",
+    "pe degradation": "Ghosh2021_pe_deg",
+    "citation": "Ghosh2021",
+}
+
 Chen2020 = {
     "chemistry": "lithium_ion",
     "cell": "LGM50_Chen2020",
