@@ -1503,18 +1503,25 @@ def r_average(symbol):
         ["positive core"],
         ["positive shell"],
         ["positive shell oxygen"],
+        # ["positive particle"],
+        # ["negative particle"]
     ]:
         raise pybamm.DomainError(
                 "r_average implementation for domain 'positive core or shell (oxygen)'"
                 " is in submodel base_phase_transition.py"
         )
+        # rxy = pybamm.SpatialVariable("r_oo", symbol.domain)
+        # v = pybamm.FullBroadcast(
+        #     pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
+        # )
+        # coeff = (rxy ** 2) # 4 * np.pi * 
+        # return Integral(coeff * symbol, rxy) / Integral(coeff * v, rxy)
     else:
         r = pybamm.SpatialVariable("r", symbol.domain)
         v = pybamm.FullBroadcast(
             pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
         )
         return Integral(symbol, r) / Integral(v, r)
-
 
 def size_average(symbol):
     """convenience function for averaging over particle size R using the area-weighted
