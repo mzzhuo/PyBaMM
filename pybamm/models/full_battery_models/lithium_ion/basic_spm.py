@@ -150,6 +150,8 @@ class BasicSPM(BaseModel):
         # Primary broadcasts are used to broadcast scalar quantities across a domain
         # into a vector of the right shape, for multiplying with other vectors
         self.variables = {
+            "X-averaged negative particle concentration": c_s_n,
+            "X-averaged positive particle concentration": c_s_p,
             "Negative particle surface concentration": pybamm.PrimaryBroadcast(
                 c_s_surf_n, "negative electrode"
             ),
