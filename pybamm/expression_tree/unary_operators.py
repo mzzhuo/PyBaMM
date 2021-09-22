@@ -1502,20 +1502,23 @@ def r_average(symbol):
     elif symbol.domain in [
         ["positive core"],
         ["positive shell"],
-        ["positive shell oxygen"],
-        # ["positive particle"],
-        # ["negative particle"]
+        ["positive shell oxygen"]
     ]:
         raise pybamm.DomainError(
-                "r_average implementation for domain 'positive core or shell (oxygen)'"
-                " is in submodel base_phase_transition.py"
+            "r_average implementation for domain 'positive core or shell (oxygen)'"
+            " is in submodel base_phase_transition.py"
         )
-        # rxy = pybamm.SpatialVariable("r_oo", symbol.domain)
-        # v = pybamm.FullBroadcast(
-        #     pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
-        # )
-        # coeff = (rxy ** 2) # 4 * np.pi * 
-        # return Integral(coeff * symbol, rxy) / Integral(coeff * v, rxy)
+    # test particle model using cartesian coordinate
+    # elif symbol.domain in [
+        # ["positive particle"],
+        # ["negative particle"]
+    # ]:
+    #     rxy = pybamm.SpatialVariable("r_oo", symbol.domain)
+    #     v = pybamm.FullBroadcast(
+    #         pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
+    #     )
+    #     coeff = (rxy ** 2) # 4 * np.pi * 
+    #     return Integral(coeff * symbol, rxy) / Integral(coeff * v, rxy)
     else:
         r = pybamm.SpatialVariable("r", symbol.domain)
         v = pybamm.FullBroadcast(
