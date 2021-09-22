@@ -1,0 +1,32 @@
+Name [units],Value,Reference,Notes
+# Empty rows and rows starting with ‘#’ will be ignored,,,
+,,,
+# Macroscale geometry,,,
+Negative electrode thickness [m],86.7E-6,,
+Separator thickness [m],12E-6,,
+Positive electrode thickness [m],66.2E-6,,
+Electrode height [m],5.8E-2,,needed for A_cc total lithium total active suface
+Electrode width [m],1.23,,needed for A_cc total lithium
+# Cell cooling surface area [m2],5.31E-3,Chen 2020,cylindrical
+# Cell volume [m3],2.42E-5,Chen 2020,cylindrical
+,,,
+# Current collector properties ,,,
+# Negative current collector conductivity [S.m-1],58411000,CRC Handbook,copper
+# Positive current collector conductivity [S.m-1],36914000,CRC Handbook,aluminium
+,,,
+# Density,,,
+# Negative current collector density [kg.m-3],8960,CRC Handbook,copper
+# Positive current collector density [kg.m-3],2700,CRC Handbook,aluminium
+,,,
+# Specific heat capacity,,,
+# Negative current collector specific heat capacity [J.kg-1.K-1],385,CRC Handbook,copper
+# Positive current collector specific heat capacity [J.kg-1.K-1],897,CRC Handbook,aluminium
+,,,
+# Thermal conductivity,,,
+# Negative current collector thermal conductivity [W.m-1.K-1],401,CRC Handbook,copper
+# Positive current collector thermal conductivity [W.m-1.K-1],237,CRC Handbook,aluminium
+,,,
+# Electrical,,,
+Nominal cell capacity [A.h],3.35,,
+Typical current [A],3.35,Chen 2020,
+Current function [A],3.35,,default current function 1 C
