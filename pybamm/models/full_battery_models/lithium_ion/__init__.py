@@ -13,3 +13,6 @@ from .basic_spm import BasicSPM
 from .basic_dfn_half_cell import BasicDFNHalfCell
 from .Yang2017 import Yang2017
 from .mpm import MPM
+
+from .pe_degradation_model import PeDegradationModel
+from .basic_spm_test import BasicSPMTest
