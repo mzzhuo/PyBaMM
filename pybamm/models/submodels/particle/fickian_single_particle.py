@@ -66,9 +66,27 @@ class FickianSingleParticle(BaseParticle):
         N_s_xav = variables["X-averaged " + self.domain.lower() + " particle flux"]
 
         if self.domain == "Negative":
+            # r_n = pybamm.SpatialVariable(
+            #     "r_n",
+            #     domain=["negative particle"],
+            #     auxiliary_domains={
+            #         "secondary": "current collector",
+            #     },
+            #     coord_sys="cartesian",
+            # )
+            # self.rhs = {c_s_xav: -(1 / self.param.C_n / r_n ** 2) * pybamm.div(r_n ** 2 * N_s_xav)}
             self.rhs = {c_s_xav: -(1 / self.param.C_n) * pybamm.div(N_s_xav)}
 
         elif self.domain == "Positive":
+            # r_p = pybamm.SpatialVariable(
+            #     "r_p",
+            #     domain=["positive particle"],
+            #     auxiliary_domains={
+            #         "secondary": "current collector",
+            #     },
+            #     coord_sys="cartesian",
+            # )
+            # self.rhs = {c_s_xav: -(1 / self.param.C_p / r_p ** 2) * pybamm.div(r_p ** 2 * N_s_xav)}
             self.rhs = {c_s_xav: -(1 / self.param.C_p) * pybamm.div(N_s_xav)}
 
     def set_boundary_conditions(self, variables):
