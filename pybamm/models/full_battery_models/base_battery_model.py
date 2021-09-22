@@ -409,7 +409,7 @@ class BaseBatteryModel(pybamm.BaseModel):
         base_chemistry = pybamm.parameter_sets.Marquis2019
         if self.options["PE phase transition"] in ["yes", "on"]:
             base_chemistry = pybamm.parameter_sets.Zhuo2021
-        return pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Marquis2019)
+        return pybamm.ParameterValues(chemistry=base_chemistry)
 
     @property
     def default_geometry(self):
