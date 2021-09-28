@@ -1510,10 +1510,12 @@ def r_average(symbol):
         )
     # test particle model using cartesian coordinate
     # elif symbol.domain in [
-        # ["positive particle"],
-        # ["negative particle"]
+    #     # ["positive particle"],
+    #     ["negative particle"]
     # ]:
-    #     rxy = pybamm.SpatialVariable("r_oo", symbol.domain)
+    #     rxy = pybamm.SpatialVariable(
+    #         "r_oo", symbol.domain, symbol.auxiliary_domains
+    #     )
     #     v = pybamm.FullBroadcast(
     #         pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
     #     )
