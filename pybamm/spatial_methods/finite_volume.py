@@ -181,7 +181,8 @@ class FiniteVolume(pybamm.SpatialMethod):
             r_edges = pybamm.Vector(r_edges_numpy)
 
             out = (1 / (r ** 2)) * (
-                divergence_matrix @ ((r_edges ** 2) * discretised_symbol)
+                # divergence_matrix @ ((r_edges ** 2) * discretised_symbol)
+                divergence_matrix @ (discretised_symbol * (r_edges ** 2))
             )
         else:
             out = divergence_matrix @ discretised_symbol
