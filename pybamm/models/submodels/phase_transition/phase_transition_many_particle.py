@@ -149,6 +149,10 @@ class PhaseTransitionManyParticle(BaseTransition):
             ((1 - s) * s_dot * dx_co * self.c_o_core - D_o * c_o_1)
             / ((1 - s) * s_dot * dx_co - D_o)
         )
+        # c_o_b = (
+        #     ((1 - s) * s_dot * dx_co * self.c_o_core - D_o / self.C_o * c_o_1)
+        #     / ((1 - s) * s_dot * dx_co - D_o / self.C_o)
+        # )
         c_o_b_xav = pybamm.x_average(c_o_b)
 
         variables.update(

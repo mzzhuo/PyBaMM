@@ -145,8 +145,8 @@ class PhaseTransitionSingleParticle(BaseTransition):
         # boundary oxygen concentration from applied bc
         # not extrapolated afterwards
         c_o_b_xav = (
-            ((1 - s_xav) * s_dot * dx_co_av * self.c_o_core - D_o * c_o_1_av)
-            / ((1 - s_xav) * s_dot * dx_co_av - D_o)
+            ((1 - s_xav) * s_dot * dx_co_av * self.c_o_core - D_o / self.C_o * c_o_1_av)
+            / ((1 - s_xav) * s_dot * dx_co_av - D_o / self.C_o)
         )
         c_o_b = pybamm.PrimaryBroadcast(c_o_b_xav, ["positive electrode"])
 
