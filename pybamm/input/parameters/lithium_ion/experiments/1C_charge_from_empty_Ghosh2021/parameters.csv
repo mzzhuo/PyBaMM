@@ -13,6 +13,6 @@ Upper voltage cut-off [V],4.2,,
 ,,,
 # Initial conditions
 Initial concentration in negative electrode [mol.m-3],68.514,,0.002 * c_max_n
-Initial concentration in positive electrode [mol.m-3],46478.28,,0.942 * c_max_p
+# Initial concentration in positive electrode [mol.m-3] stored in pe_degradation folder
 Initial concentration in electrolyte [mol.m-3],1000,,
 Initial temperature [K],298.15,,

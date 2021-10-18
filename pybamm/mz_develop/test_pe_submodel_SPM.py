@@ -43,6 +43,43 @@ t_eval = np.linspace(0, 7300, 100)
 solution = solver.solve(model_disc, t_eval)
 
 #%%
+output_variables = [
+    "X-averaged negative particle concentration [mol.m-3]",
+    # "X-averaged positive particle concentration [mol.m-3]",
+    #---------------------------------------------------------
+    "X-averaged positive core concentration [mol.m-3]",
+    #---------------------------------------------------------
+    # "X-averaged positive shell concentration [mol.m-3]",
+    # #---------------------------------------------------------
+    "X-averaged positive shell concentration of oxygen [mol.m-3]",
+    #---------------------------------------------------------
+    # "X-averaged moving phase boundary location",
+    # #---------------------------------------------------------
+    # "X-averaged shared concentration at core-shell interface [mol.m-3]",
+    #---------------------------------------------------------
+    # "Current [A]",
+    "Terminal voltage [V]",
+    # "X-averaged positive electrode temperature [K]",
+    # "X-averaged time derivative of moving phase boundary location",
+]
+#%
+output_variables.extend(
+    [
+        #---------------------------------------------------------
+        [
+            "Total lithium in positive electrode [mol]",
+            "Total lithium in negative electrode [mol]",
+            "Total lithium [mol]",
+        ],
+        "Loss of lithium inventory [%]",
+        # "Electrolyte concentration [mol.m-3]",
+        # "Negative electrode potential [V]",
+        # "Electrolyte potential [V]",
+        # "Positive electrode potential [V]",
+    ]
+)
+
+#%%
 # solution = sim.solution
 plot = pybamm.QuickPlot(
     solution,
@@ -94,44 +131,6 @@ solution = sim.solve()
 
 # sim = pybamm.Simulation(model, parameter_values=param)
 # solution = sim.solve([0, 7300])
-
-
-#%%
-output_variables = [
-    "X-averaged negative particle concentration [mol.m-3]",
-    # "X-averaged positive particle concentration [mol.m-3]",
-    #---------------------------------------------------------
-    "X-averaged positive core concentration [mol.m-3]",
-    #---------------------------------------------------------
-    # "X-averaged positive shell concentration [mol.m-3]",
-    # #---------------------------------------------------------
-    # "X-averaged positive shell concentration of oxygen [mol.m-3]",
-    #---------------------------------------------------------
-    # "X-averaged moving phase boundary location",
-    # #---------------------------------------------------------
-    # "X-averaged shared concentration at core-shell interface [mol.m-3]",
-    #---------------------------------------------------------
-    # "Current [A]",
-    "Terminal voltage [V]",
-    # "X-averaged positive electrode temperature [K]",
-    # "X-averaged time derivative of moving phase boundary location",
-]
-#%
-output_variables.extend(
-    [
-        #---------------------------------------------------------
-        [
-            "Total lithium in positive electrode [mol]",
-            "Total lithium in negative electrode [mol]",
-            "Total lithium [mol]",
-        ],
-        "Loss of lithium inventory [%]",
-        # "Electrolyte concentration [mol.m-3]",
-        # "Negative electrode potential [V]",
-        # "Electrolyte potential [V]",
-        # "Positive electrode potential [V]",
-    ]
-)
 
 #%%
 sim.plot(output_variables)
