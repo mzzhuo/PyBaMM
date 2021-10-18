@@ -130,9 +130,14 @@ class SPM(BaseModel):
             # make sure set_phase_transition_submodel comes after
             # set_particle_submodel
             if "positive particle" in self.submodels:
+                 # self.submodels[
+                #     "positive particle"
+                # ] = pybamm.phase_transition.PhaseTransitionSingleParticle(
+                #     self.param, "Positive"
+                # )
                 self.submodels[
                     "positive particle"
-                ] = pybamm.phase_transition.PhaseTransitionSingleParticle(
+                ] = pybamm.pe_degradation.PeDegradationSingleParticle(
                     self.param, "Positive"
                 )
             else:

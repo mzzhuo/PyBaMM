@@ -108,9 +108,14 @@ class DFN(BaseModel):
             # make sure set_phase_transition_submodel comes after
             # set_particle_submodel
             if "positive particle" in self.submodels:
+                # self.submodels[
+                #     "positive particle"
+                # ] = pybamm.phase_transition.PhaseTransitionManyParticle(
+                #     self.param, "Positive"
+                # )
                 self.submodels[
                     "positive particle"
-                ] = pybamm.phase_transition.PhaseTransitionManyParticle(
+                ] = pybamm.pe_degradation.PeDegradationManyParticle(
                     self.param, "Positive"
                 )
             else:
