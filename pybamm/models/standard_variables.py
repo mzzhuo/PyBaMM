@@ -9,6 +9,9 @@ class StandardVariables:
     def __init__(self):
         # Discharge capacity
         self.Q = pybamm.Variable("Discharge capacity [A.h]")
+        # Total charge throughput 
+        # self.Q_tct = pybamm.Variable("Total charge throughput [A.h]")
+
 
         # Electrolyte concentration
         self.c_e_n = pybamm.Variable(
