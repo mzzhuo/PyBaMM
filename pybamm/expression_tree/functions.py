@@ -359,6 +359,21 @@ def exp(child):
     return simplified_function(Exponential, child)
 
 
+class Absolute(SpecificFunction):
+    """Absolute function."""
+
+    def __init__(self, child):
+        super().__init__(np.absolute, child)
+
+    def _function_diff(self, children, idx):
+        """See :meth:`pybamm.Function._function_diff()`."""
+        return Absolute(children[0])
+
+
+def abs(child):
+    """Returns exponential function of child."""
+    return simplified_function(Absolute, child)
+
 class Log(SpecificFunction):
     """Logarithmic function."""
 
