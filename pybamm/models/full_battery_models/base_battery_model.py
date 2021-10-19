@@ -563,19 +563,25 @@ class BaseBatteryModel(pybamm.BaseModel):
         self.variables.update(
             {
                 "Sum of electrolyte reaction source terms": 0,
-                "Sum of negative electrode electrolyte reaction source terms": 0,
                 "Sum of positive electrode electrolyte reaction source terms": 0,
-                "Sum of x-averaged negative electrode "
-                "electrolyte reaction source terms": 0,
                 "Sum of x-averaged positive electrode "
                 "electrolyte reaction source terms": 0,
                 "Sum of interfacial current densities": 0,
-                "Sum of negative electrode interfacial current densities": 0,
                 "Sum of positive electrode interfacial current densities": 0,
-                "Sum of x-averaged negative electrode interfacial current densities": 0,
                 "Sum of x-averaged positive electrode interfacial current densities": 0,
             }
         )
+        if not self.half_cell:
+            self.variables.update(
+                {
+                    "Sum of negative electrode electrolyte reaction source terms": 0,
+                    "Sum of x-averaged negative electrode "
+                    "electrolyte reaction source terms": 0,
+                    "Sum of negative electrode interfacial current densities": 0,
+                    "Sum of x-averaged negative electrode interfacial current densities"
+                    "": 0,
+                }
+            )
 
     def build_fundamental_and_external(self):
         # Get the fundamental variables
@@ -653,33 +659,33 @@ class BaseBatteryModel(pybamm.BaseModel):
         # Set model equations
         for submodel_name, submodel in self.submodels.items():
             if submodel.external is False:
-                pybamm.logger.debug(
+                pybamm.logger.verbose(
                     "Setting rhs for {} submodel ({})".format(submodel_name, self.name)
                 )
 
                 submodel.set_rhs(self.variables)
-                pybamm.logger.debug(
+                pybamm.logger.verbose(
                     "Setting algebraic for {} submodel ({})".format(
                         submodel_name, self.name
                     )
                 )
 
                 submodel.set_algebraic(self.variables)
-                pybamm.logger.debug(
+                pybamm.logger.verbose(
                     "Setting boundary conditions for {} submodel ({})".format(
                         submodel_name, self.name
                     )
                 )
 
                 submodel.set_boundary_conditions(self.variables)
-                pybamm.logger.debug(
+                pybamm.logger.verbose(
                     "Setting initial conditions for {} submodel ({})".format(
                         submodel_name, self.name
                     )
                 )
                 submodel.set_initial_conditions(self.variables)
                 submodel.set_events(self.variables)
-                pybamm.logger.debug(
+                pybamm.logger.verbose(
                     "Updating {} submodel ({})".format(submodel_name, self.name)
                 )
                 self.update(submodel)
@@ -765,16 +771,18 @@ class BaseBatteryModel(pybamm.BaseModel):
 
     def set_tortuosity_submodels(self):
         self.submodels["electrolyte tortuosity"] = pybamm.tortuosity.Bruggeman(
-            self.param, "Electrolyte"
+            self.param, "Electrolyte", self.options
         )
         self.submodels["electrode tortuosity"] = pybamm.tortuosity.Bruggeman(
-            self.param, "Electrode"
+            self.param, "Electrode", self.options
         )
 
     def set_thermal_submodel(self):
 
         if self.options["thermal"] == "isothermal":
-            thermal_submodel = pybamm.thermal.isothermal.Isothermal(self.param)
+            thermal_submodel = pybamm.thermal.isothermal.Isothermal(
+                self.param, self.options
+            )
 
         elif self.options["thermal"] == "lumped":
             thermal_submodel = pybamm.thermal.Lumped(
@@ -854,12 +862,20 @@ class BaseBatteryModel(pybamm.BaseModel):
         ocv_dim = ocp_p_right_dim - ocp_n_left_dim
 
         # overpotentials
-        eta_r_n_av = self.variables[
-            "X-averaged negative electrode reaction overpotential"
-        ]
-        eta_r_n_av_dim = self.variables[
-            "X-averaged negative electrode reaction overpotential [V]"
-        ]
+        if self.half_cell:
+            eta_r_n_av = self.variables[
+                "Lithium metal interface reaction overpotential"
+            ]
+            eta_r_n_av_dim = self.variables[
+                "Lithium metal interface reaction overpotential [V]"
+            ]
+        else:
+            eta_r_n_av = self.variables[
+                "X-averaged negative electrode reaction overpotential"
+            ]
+            eta_r_n_av_dim = self.variables[
+                "X-averaged negative electrode reaction overpotential [V]"
+            ]
         eta_r_p_av = self.variables[
             "X-averaged positive electrode reaction overpotential"
         ]
@@ -883,20 +899,12 @@ class BaseBatteryModel(pybamm.BaseModel):
         eta_r_av_dim = eta_r_p_av_dim - eta_r_n_av_dim
 
         # SEI film overpotential
-        eta_sei_n_av = self.variables[
-            "X-averaged negative electrode SEI film overpotential"
-        ]
-        eta_sei_p_av = self.variables[
-            "X-averaged positive electrode SEI film overpotential"
-        ]
-        eta_sei_n_av_dim = self.variables[
-            "X-averaged negative electrode SEI film overpotential [V]"
-        ]
-        eta_sei_p_av_dim = self.variables[
-            "X-averaged positive electrode SEI film overpotential [V]"
-        ]
-        eta_sei_av = eta_sei_n_av + eta_sei_p_av
-        eta_sei_av_dim = eta_sei_n_av_dim + eta_sei_p_av_dim
+        if self.half_cell:
+            eta_sei_av = self.variables["SEI film overpotential"]
+            eta_sei_av_dim = self.variables["SEI film overpotential [V]"]
+        else:
+            eta_sei_av = self.variables["X-averaged SEI film overpotential"]
+            eta_sei_av_dim = self.variables["X-averaged SEI film overpotential [V]"]
 
         # TODO: add current collector losses to the voltage in 3D
 
@@ -940,9 +948,7 @@ class BaseBatteryModel(pybamm.BaseModel):
         )
         # Variables for calculating the equivalent circuit model (ECM) resistance
         # Need to compare OCV to initial value to capture this as an overpotential
-        ocv_init = self.param.U_p(
-            self.param.c_p_init(1), self.param.T_init
-        ) - self.param.U_n(self.param.c_n_init(0), self.param.T_init)
+        ocv_init = self.param.U_p_init - self.param.U_n_init
         ocv_init_dim = (
             self.param.U_p_ref
             - self.param.U_n_ref

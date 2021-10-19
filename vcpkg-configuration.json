@@ -1,8 +1,13 @@
 {
+  "default-registry": {
+    "kind": "builtin",
+    "baseline": "042e1db92d115819bba6bffd681a174543111139"
+  },
   "registries": [
     {
       "kind": "git",
       "repository": "https://github.com/pybamm-team/sundials-vcpkg-registry.git",
+      "baseline": "c19f72020d323811c5a5adf96235b961ec4ef89a",
       "packages": [ "sundials" ]
     }
   ]

@@ -40,10 +40,17 @@ Lithium-ion parameter sets
          Warnecke, and Dirk Uwe Sauer. Parameterization of a Physico-Chemical Model of a
          Lithium-Ion Battery: I. Determination of Parameters. Journal of the
          Electrochemical Society, 162(9):A1836–A1848, 2015. doi:10.1149/2.0551509jes.
+       - Alastair Hales, Laura Bravo Diaz, Mohamed Waseem Marzook, Yan Zhao, Yatish
+         Patel, and Gregory Offer. The cell cooling coefficient: a standard to define
+         heat rejection from lithium-ion batteries. Journal of The Electrochemical
+         Society, 166(12):A2383, 2019.
        - Giles Richardson, Ivan Korotkin, Rahifa Ranom, Michael Castle, and Jamie M.
          Foster. Generalised single particle models for high-rate operation of graded
          lithium-ion electrodes: systematic derivation and validation. Electrochimica
          Acta, 339:135862, 2020. doi:10.1016/j.electacta.2020.135862.
+       - Yan Zhao, Yatish Patel, Teng Zhang, and Gregory J Offer. Modeling the effects
+         of thermal gradients induced by tab and surface cooling on lithium ion cell
+         performance. Journal of The Electrochemical Society, 165(13):A3169, 2018.
     * Marquis2019 :
        - Scott G. Marquis, Valentin Sulzer, Robert Timms, Colin P. Please, and S. Jon
          Chapman. An asymptotic derivation of a single particle model with electrolyte.
@@ -59,6 +66,15 @@ Lithium-ion parameter sets
          Pesaran. Multi-domain modeling of lithium-ion batteries encompassing
          multi-physics in varied length scales. Journal of the Electrochemical Society,
          158(8):A955–A969, 2011. doi:10.1149/1.3597614.
+    * ORegan2021 :
+       - Chang-Hui Chen, Ferran Brosa Planella, Kieran O'Regan, Dominika Gastol, W.
+         Dhammika Widanage, and Emma Kendrick. Development of Experimental Techniques
+         for Parameterization of Multi-scale Lithium-ion Battery Models. Journal of The
+         Electrochemical Society, 167(8):080534, 2020. doi:10.1149/1945-7111/ab9050.
+       - Kieran O'Regan, Ferran Brosa Planella, W. Dhammika Widanage, and Emma Kendrick.
+         Thermal-electrochemical parametrisation of a lithium-ion battery: mapping Li
+         concentration and temperature dependencies. Journal of The Electrochemical
+         Society, ():, 2021. doi:.
     * Prada2013 :
        - Chang-Hui Chen, Ferran Brosa Planella, Kieran O'Regan, Dominika Gastol, W.
          Dhammika Widanage, and Emma Kendrick. Development of Experimental Techniques
@@ -108,7 +124,13 @@ Ecker2015 = {
     "electrolyte": "lipf6_Ecker2015",
     "experiment": "1C_discharge_from_full_Ecker2015",
     "sei": "example",
-    "citation": ["Ecker2015i", "Ecker2015ii", "Richardson2020"],
+    "citation": [
+        "Ecker2015i",
+        "Ecker2015ii",
+        "Zhao2018",
+        "Hales2019",
+        "Richardson2020",
+    ],
 }
 
 Marquis2019 = {
@@ -204,7 +226,19 @@ Xu2019 = {
     "positive electrode": "NMC532_Xu2019",
     "electrolyte": "lipf6_Valoen2005",
     "experiment": "1C_discharge_from_full_Xu2019",
+    "sei": "example",
     "citation": "Xu2019",
+}
+
+ORegan2021 = {
+    "chemistry": "lithium_ion",
+    "cell": "LGM50_ORegan2021",
+    "negative electrode": "graphite_ORegan2021",
+    "separator": "separator_ORegan2021",
+    "positive electrode": "nmc_ORegan2021",
+    "electrolyte": "lipf6_EC_EMC_3_7_Landesfeind2019",
+    "experiment": "1C_discharge_from_full_ORegan2021",
+    "citation": ["ORegan2021", "Chen2020"],
 }
 
 #
