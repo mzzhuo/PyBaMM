@@ -15,8 +15,7 @@ class InverseButlerVolmer(BaseInterface):
     param
         Model parameters
     domain : iter of str, optional
-        The domain(s) in which to compute the interfacial current. Default is None,
-        in which case j.domain is used.
+        The domain(s) in which to compute the interfacial current.
     reaction : str
         The name of the reaction being implemented
     options: dict
@@ -28,23 +27,22 @@ class InverseButlerVolmer(BaseInterface):
     """
 
     def __init__(self, param, domain, reaction, options=None):
-        super().__init__(param, domain, reaction)
-        if options is None:
-            options = {"SEI film resistance": "none"}
-        self.options = options
+        super().__init__(param, domain, reaction, options=options)
 
     def get_coupled_variables(self, variables):
         ocp, dUdT = self._get_open_circuit_potential(variables)
 
         j0 = self._get_exchange_current_density(variables)
-        j_tot_av = self._get_average_total_interfacial_current_density(variables)
         # Broadcast to match j0's domain
+
+        j_tot_av = self._get_average_total_interfacial_current_density(variables)
         if j0.domain in [[], ["current collector"]]:
             j_tot = j_tot_av
         else:
             j_tot = pybamm.PrimaryBroadcast(
                 j_tot_av, [self.domain.lower() + " electrode"]
             )
+        variables.update(self._get_standard_total_interfacial_current_variables(j_tot))
 
         ne = self._get_number_of_electrons_in_reaction()
         # Note: T must have the same domain as j0 and eta_r
@@ -62,30 +60,27 @@ class InverseButlerVolmer(BaseInterface):
         eta_r = self._get_overpotential(j_tot, j0, ne, T)
 
         # With SEI resistance (distributed and averaged have the same effect here)
-        if self.options["SEI film resistance"] != "none":
-            if self.domain == "Negative":
-                R_sei = self.param.R_sei_n
-            elif self.domain == "Positive":
-                R_sei = self.param.R_sei_p
-            L_sei = variables[
-                "Total " + self.domain.lower() + " electrode SEI thickness"
-            ]
-            eta_sei = -j_tot * L_sei * R_sei
-        # Without SEI resistance
+        if self.domain == "Negative":
+            if self.options["SEI film resistance"] != "none":
+                R_sei = self.param.R_sei
+                L_sei = variables["Total SEI thickness"]
+                eta_sei = -j_tot * L_sei * R_sei
+            # Without SEI resistance
+            else:
+                eta_sei = pybamm.Scalar(0)
+            variables.update(
+                self._get_standard_sei_film_overpotential_variables(eta_sei)
+            )
         else:
             eta_sei = pybamm.Scalar(0)
 
-        delta_phi = eta_r + ocp - eta_sei
+        delta_phi = eta_r + ocp - eta_sei  # = phi_s - phi_e
 
-        variables.update(
-            self._get_standard_total_interfacial_current_variables(j_tot_av)
-        )
         variables.update(self._get_standard_exchange_current_variables(j0))
         variables.update(self._get_standard_overpotential_variables(eta_r))
         variables.update(
             self._get_standard_surface_potential_difference_variables(delta_phi)
         )
-        variables.update(self._get_standard_sei_film_overpotential_variables(eta_sei))
         variables.update(self._get_standard_ocp_variables(ocp, dUdT))
 
         return variables
@@ -100,7 +95,7 @@ class CurrentForInverseButlerVolmer(BaseInterface):
     has to be created as a separate submodel because of how the interfacial currents
     are calculated:
 
-    1. Calculate eta_r from the total average current j_tot_av = I_app / L
+    1. Calculate eta_r from the total average current j_tot_av = I_app / (a*L)
     2. Calculate j_sei from eta_r
     3. Calculate j = j_tot_av - j_sei
 
@@ -117,8 +112,7 @@ class CurrentForInverseButlerVolmer(BaseInterface):
     param
         Model parameters
     domain : iter of str, optional
-        The domain(s) in which to compute the interfacial current. Default is None,
-        in which case j.domain is used.
+        The domain(s) in which to compute the interfacial current.
     reaction : str
         The name of the reaction being implemented
 
@@ -135,11 +129,12 @@ class CurrentForInverseButlerVolmer(BaseInterface):
             + self.domain.lower()
             + " electrode total interfacial current density"
         ]
-        j_sei = variables[self.domain + " electrode SEI interfacial current density"]
-        j_stripping = variables[
-            self.domain + " electrode lithium plating interfacial current density"
-        ]
-        j = j_tot - j_sei - j_stripping
+        if self.domain == "Negative":
+            j_sei = variables["SEI interfacial current density"]
+            j_stripping = variables["Lithium plating interfacial current density"]
+            j = j_tot - j_sei - j_stripping
+        else:
+            j = j_tot
 
         variables.update(self._get_standard_interfacial_current_variables(j))
 
@@ -158,5 +153,36 @@ class CurrentForInverseButlerVolmer(BaseInterface):
             variables.update(
                 self._get_standard_whole_cell_exchange_current_variables(variables)
             )
+
+        return variables
+
+
+class CurrentForInverseButlerVolmerLithiumMetal(BaseInterface):
+    """
+    Submodel for the current associated with the inverse Butler-Volmer formulation in
+    a lithium metal cell. This is simply equal to the current collector current density.
+
+    Parameters
+    ----------
+    param
+        Model parameters
+    domain : iter of str, optional
+        The domain(s) in which to compute the interfacial current.
+    reaction : str
+        The name of the reaction being implemented
+    options : dict, optional
+        A dictionary of options to be passed to the model.
+
+    **Extends:** :class:`pybamm.interface.BaseInterface`
+    """
+
+    def __init__(self, param, domain, reaction, options=None):
+        super().__init__(param, domain, reaction, options=options)
+
+    def get_coupled_variables(self, variables):
+        i_boundary_cc = variables["Current collector current density"]
+        j = i_boundary_cc
+
+        variables.update(self._get_standard_interfacial_current_variables(j))
 
         return variables

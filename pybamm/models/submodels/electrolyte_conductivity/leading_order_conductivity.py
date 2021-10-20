@@ -16,8 +16,7 @@ class LeadingOrder(BaseElectrolyteConductivity):
         The parameters to use for this submodel
     domain : str, optional
         The domain in which the model holds
-    reactions : dict, optional
-        Dictionary of reaction terms
+
 
     **Extends:** :class:`pybamm.electrolyte_conductivity.BaseElectrolyteConductivity`
     """
@@ -50,7 +49,7 @@ class LeadingOrder(BaseElectrolyteConductivity):
         i_e_n = i_boundary_cc * x_n / l_n
         i_e_s = pybamm.PrimaryBroadcast(i_boundary_cc, ["separator"])
         i_e_p = i_boundary_cc * (1 - x_p) / l_p
-        i_e = pybamm.Concatenation(i_e_n, i_e_s, i_e_p)
+        i_e = pybamm.concatenation(i_e_n, i_e_s, i_e_p)
 
         variables.update(
             self._get_standard_potential_variables(phi_e_n, phi_e_s, phi_e_p)
