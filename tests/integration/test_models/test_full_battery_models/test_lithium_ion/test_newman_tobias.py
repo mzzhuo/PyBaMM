@@ -100,34 +100,45 @@ class TestNewmanTobias(unittest.TestCase):
         modeltest = tests.StandardModelTest(model, var_pts=var_pts)
         modeltest.test_all()
 
-    def test_loss_active_material_stress_negative(self):
-        options = {"loss of active material": ("stress-driven", "none")}
+    def test_loss_active_material(self):
+        options = {"particle cracking": "none", "loss of active material": "none"}
         model = pybamm.lithium_ion.NewmanTobias(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
-    def test_loss_active_material_stress_positive(self):
-        options = {"loss of active material": ("none", "stress-driven")}
+    def test_loss_active_material_negative(self):
+        options = {
+            "particle cracking": "no cracking",
+            "loss of active material": "negative",
+        }
         model = pybamm.lithium_ion.NewmanTobias(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
-    def test_loss_active_material_stress_both(self):
-        options = {"loss of active material": "stress-driven"}
+    def test_loss_active_material_positive(self):
+        options = {
+            "particle cracking": "no cracking",
+            "loss of active material": "positive",
+        }
         model = pybamm.lithium_ion.NewmanTobias(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
-    def test_loss_active_material_reaction_both(self):
-        options = {"loss of active material": "reaction-driven"}
+    def test_loss_active_material_both(self):
+        options = {
+            "particle cracking": "no cracking",
+            "loss of active material": "both",
+        }
         model = pybamm.lithium_ion.NewmanTobias(options)
-        modeltest = tests.StandardModelTest(model)
+        chemistry = pybamm.parameter_sets.Ai2020
+        parameter_values = pybamm.ParameterValues(chemistry=chemistry)
+        modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
     def test_surface_form_differential(self):
@@ -187,9 +198,17 @@ class TestNewmanTobiasWithSEI(unittest.TestCase):
         modeltest.test_all()
 
 
-class TestNewmanTobiasWithMechanics(unittest.TestCase):
+class TestNewmanTobiasWithCrack(unittest.TestCase):
+    def test_well_posed_no_cracking(self):
+        options = {"particle cracking": "no cracking"}
+        model = pybamm.lithium_ion.NewmanTobias(options)
+        chemistry = pybamm.parameter_sets.Ai2020
+        parameter_values = pybamm.ParameterValues(chemistry=chemistry)
+        modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
+        modeltest.test_all()
+
     def test_well_posed_negative_cracking(self):
-        options = {"particle mechanics": ("swelling and cracking", "none")}
+        options = {"particle cracking": "negative"}
         model = pybamm.lithium_ion.NewmanTobias(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
@@ -197,7 +216,7 @@ class TestNewmanTobiasWithMechanics(unittest.TestCase):
         modeltest.test_all()
 
     def test_well_posed_positive_cracking(self):
-        options = {"particle mechanics": ("none", "swelling and cracking")}
+        options = {"particle cracking": "positive"}
         model = pybamm.lithium_ion.NewmanTobias(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
@@ -205,15 +224,7 @@ class TestNewmanTobiasWithMechanics(unittest.TestCase):
         modeltest.test_all()
 
     def test_well_posed_both_cracking(self):
-        options = {"particle mechanics": "swelling and cracking"}
-        model = pybamm.lithium_ion.NewmanTobias(options)
-        chemistry = pybamm.parameter_sets.Ai2020
-        parameter_values = pybamm.ParameterValues(chemistry=chemistry)
-        modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
-        modeltest.test_all()
-
-    def test_well_posed_both_swelling_only(self):
-        options = {"particle mechanics": "swelling only"}
+        options = {"particle cracking": "both"}
         model = pybamm.lithium_ion.NewmanTobias(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)

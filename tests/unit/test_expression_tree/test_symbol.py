@@ -1,16 +1,12 @@
 #
 # Test for the Symbol class
 #
-import os
-import unittest
-
-import numpy as np
-from scipy.sparse.csr import csr_matrix
-import sympy
-from scipy.sparse import coo_matrix
-
 import pybamm
-from pybamm.expression_tree.binary_operators import _Heaviside
+
+import unittest
+import numpy as np
+import os
+from scipy.sparse import coo_matrix
 
 
 class TestSymbol(unittest.TestCase):
@@ -98,11 +94,6 @@ class TestSymbol(unittest.TestCase):
         # unary
         self.assertIsInstance(-a, pybamm.Negate)
         self.assertIsInstance(abs(a), pybamm.AbsoluteValue)
-        # special cases
-        neg_a = -a
-        self.assertEqual(-neg_a, a)
-        abs_a = abs(a)
-        self.assertEqual(abs(abs_a), abs_a)
 
         # binary - two symbols
         self.assertIsInstance(a + b, pybamm.Addition)
@@ -111,10 +102,10 @@ class TestSymbol(unittest.TestCase):
         self.assertIsInstance(a @ b, pybamm.MatrixMultiplication)
         self.assertIsInstance(a / b, pybamm.Division)
         self.assertIsInstance(a ** b, pybamm.Power)
-        self.assertIsInstance(a < b, _Heaviside)
-        self.assertIsInstance(a <= b, _Heaviside)
-        self.assertIsInstance(a > b, _Heaviside)
-        self.assertIsInstance(a >= b, _Heaviside)
+        self.assertIsInstance(a < b, pybamm.Heaviside)
+        self.assertIsInstance(a <= b, pybamm.Heaviside)
+        self.assertIsInstance(a > b, pybamm.Heaviside)
+        self.assertIsInstance(a >= b, pybamm.Heaviside)
         self.assertIsInstance(a % b, pybamm.Modulo)
 
         # binary - symbol and number
@@ -309,12 +300,6 @@ class TestSymbol(unittest.TestCase):
         ):
             (a + a).simplify()
 
-    def test_simplify_if_constant(self):
-        m = pybamm.Matrix(np.zeros((10, 10)))
-        m_simp = pybamm.simplify_if_constant(m)
-        self.assertIsInstance(m_simp, pybamm.Matrix)
-        self.assertIsInstance(m_simp.entries, csr_matrix)
-
     def test_symbol_repr(self):
         """
         test that __repr___ returns the string
@@ -370,12 +355,42 @@ class TestSymbol(unittest.TestCase):
         )
 
     def test_symbol_visualise(self):
-        c = pybamm.Variable("c", "negative electrode")
-        sym = pybamm.div(c * pybamm.grad(c)) + (c / 2 + c - 1) ** 5
-        sym.visualise("test_visualize.png")
-        self.assertTrue(os.path.exists("test_visualize.png"))
+
+        param = pybamm.LithiumIonParameters()
+
+        zero_n = pybamm.FullBroadcast(0, ["negative electrode"], "current collector")
+        zero_s = pybamm.FullBroadcast(0, ["separator"], "current collector")
+        zero_p = pybamm.FullBroadcast(0, ["positive electrode"], "current collector")
+
+        zero_nsp = pybamm.Concatenation(zero_n, zero_s, zero_p)
+
+        v_box = pybamm.Scalar(0)
+
+        variables = {
+            "Porosity": param.epsilon,
+            "Electrolyte tortuosity": param.epsilon ** 1.5,
+            "Porosity change": zero_nsp,
+            "Electrolyte current density": zero_nsp,
+            "Volume-averaged velocity": v_box,
+            "Interfacial current density": zero_nsp,
+            "Oxygen interfacial current density": zero_nsp,
+            "Cell temperature": pybamm.Concatenation(zero_n, zero_s, zero_p),
+            "Transverse volume-averaged acceleration": pybamm.Concatenation(
+                zero_n, zero_s, zero_p
+            ),
+            "Sum of electrolyte reaction source terms": zero_nsp,
+        }
+        model = pybamm.electrolyte_diffusion.Full(param)
+        variables.update(model.get_fundamental_variables())
+        variables.update(model.get_coupled_variables(variables))
+
+        model.set_rhs(variables)
+
+        rhs = list(model.rhs.values())[0]
+        rhs.visualise("StefanMaxwell_test.png")
+        self.assertTrue(os.path.exists("StefanMaxwell_test.png"))
         with self.assertRaises(ValueError):
-            sym.visualise("test_visualize")
+            rhs.visualise("StefanMaxwell_test")
 
     def test_has_spatial_derivatives(self):
         var = pybamm.Variable("var", domain="test")
@@ -433,7 +448,9 @@ class TestSymbol(unittest.TestCase):
         func = pybamm.FunctionParameter("func", {"state": state})
         self.assertEqual(func.shape_for_testing, state.shape_for_testing)
 
-        concat = pybamm.concatenation(state, state2)
+        concat = pybamm.Concatenation()
+        self.assertEqual(concat.shape_for_testing, (0,))
+        concat = pybamm.Concatenation(state, state2)
         self.assertEqual(concat.shape_for_testing, (30, 1))
         self.assertEqual(concat.size_for_testing, 30)
 
@@ -463,9 +480,6 @@ class TestSymbol(unittest.TestCase):
         y2 = pybamm.StateVector(slice(0, 5))
         with self.assertRaises(pybamm.ShapeError):
             (y1 + y2).test_shape()
-
-    def test_to_equation(self):
-        self.assertEqual(pybamm.Symbol("test").to_equation(), sympy.Symbol("test"))
 
 
 class TestIsZero(unittest.TestCase):

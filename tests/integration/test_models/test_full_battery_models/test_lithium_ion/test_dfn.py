@@ -21,21 +21,6 @@ class TestDFN(unittest.TestCase):
         )
         modeltest.test_all()
 
-    def test_sensitivities(self):
-        options = {"thermal": "isothermal"}
-        model = pybamm.lithium_ion.DFN(options)
-        # use Ecker parameters for nonlinear diffusion
-        param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Ecker2015)
-        var = pybamm.standard_spatial_vars
-        var_pts = {var.x_n: 10, var.x_s: 10, var.x_p: 10, var.r_n: 5, var.r_p: 5}
-        modeltest = tests.StandardModelTest(
-            model, parameter_values=param, var_pts=var_pts
-        )
-        modeltest.test_sensitivities(
-            "Current function [A]",
-            0.15652,
-        )
-
     def test_basic_processing_1plus1D(self):
         options = {"current collector": "potential pair", "dimensionality": 1}
         model = pybamm.lithium_ion.DFN(options)
@@ -119,34 +104,45 @@ class TestDFN(unittest.TestCase):
         modeltest = tests.StandardModelTest(model)
         modeltest.test_all()
 
-    def test_loss_active_material_stress_negative(self):
-        options = {"loss of active material": ("stress-driven", "none")}
+    def test_loss_active_material(self):
+        options = {"particle cracking": "none", "loss of active material": "none"}
         model = pybamm.lithium_ion.DFN(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
-    def test_loss_active_material_stress_positive(self):
-        options = {"loss of active material": ("none", "stress-driven")}
+    def test_loss_active_material_negative(self):
+        options = {
+            "particle cracking": "no cracking",
+            "loss of active material": "negative",
+        }
         model = pybamm.lithium_ion.DFN(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
-    def test_loss_active_material_stress_both(self):
-        options = {"loss of active material": "stress-driven"}
+    def test_loss_active_material_positive(self):
+        options = {
+            "particle cracking": "no cracking",
+            "loss of active material": "positive",
+        }
         model = pybamm.lithium_ion.DFN(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
-    def test_loss_active_material_reaction_both(self):
-        options = {"loss of active material": "reaction-driven"}
+    def test_loss_active_material_both(self):
+        options = {
+            "particle cracking": "no cracking",
+            "loss of active material": "both",
+        }
         model = pybamm.lithium_ion.DFN(options)
-        modeltest = tests.StandardModelTest(model)
+        chemistry = pybamm.parameter_sets.Ai2020
+        parameter_values = pybamm.ParameterValues(chemistry=chemistry)
+        modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
 
     def test_surface_form_differential(self):
@@ -180,16 +176,6 @@ class TestDFN(unittest.TestCase):
         # TODO: investigate if there is a bug or some way to improve the
         # implementation
         param["Current function [A]"] = 0.5 * param["Nominal cell capacity [A.h]"]
-        modeltest = tests.StandardModelTest(model, parameter_values=param)
-        modeltest.test_all()
-
-    def test_well_posed_irreversible_plating_with_porosity(self):
-        options = {
-            "lithium plating": "irreversible",
-            "lithium plating porosity change": "true",
-        }
-        model = pybamm.lithium_ion.DFN(options)
-        param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Chen2020_plating)
         modeltest = tests.StandardModelTest(model, parameter_values=param)
         modeltest.test_all()
 
@@ -238,9 +224,17 @@ class TestDFNWithSEI(unittest.TestCase):
         modeltest.test_all()
 
 
-class TestDFNWithMechanics(unittest.TestCase):
+class TestDFNWithCrack(unittest.TestCase):
+    def test_well_posed_no_cracking(self):
+        options = {"particle": "Fickian diffusion", "particle cracking": "no cracking"}
+        model = pybamm.lithium_ion.DFN(options)
+        chemistry = pybamm.parameter_sets.Ai2020
+        parameter_values = pybamm.ParameterValues(chemistry=chemistry)
+        modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
+        modeltest.test_all()
+
     def test_well_posed_negative_cracking(self):
-        options = {"particle mechanics": ("swelling and cracking", "none")}
+        options = {"particle": "Fickian diffusion", "particle cracking": "negative"}
         model = pybamm.lithium_ion.DFN(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
@@ -248,7 +242,7 @@ class TestDFNWithMechanics(unittest.TestCase):
         modeltest.test_all()
 
     def test_well_posed_positive_cracking(self):
-        options = {"particle mechanics": ("none", "swelling and cracking")}
+        options = {"particle": "Fickian diffusion", "particle cracking": "positive"}
         model = pybamm.lithium_ion.DFN(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
@@ -256,104 +250,12 @@ class TestDFNWithMechanics(unittest.TestCase):
         modeltest.test_all()
 
     def test_well_posed_both_cracking(self):
-        options = {"particle mechanics": "swelling and cracking"}
+        options = {"particle": "Fickian diffusion", "particle cracking": "both"}
         model = pybamm.lithium_ion.DFN(options)
         chemistry = pybamm.parameter_sets.Ai2020
         parameter_values = pybamm.ParameterValues(chemistry=chemistry)
         modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
         modeltest.test_all()
-
-    def test_well_posed_both_swelling_only(self):
-        options = {"particle mechanics": "swelling only"}
-        model = pybamm.lithium_ion.DFN(options)
-        chemistry = pybamm.parameter_sets.Ai2020
-        parameter_values = pybamm.ParameterValues(chemistry=chemistry)
-        modeltest = tests.StandardModelTest(model, parameter_values=parameter_values)
-        modeltest.test_all()
-
-
-class TestDFNWithSizeDistribution(unittest.TestCase):
-    def setUp(self):
-        params = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Marquis2019)
-        self.params = pybamm.get_size_distribution_parameters(params)
-
-        var = pybamm.standard_spatial_vars
-        self.var_pts = {
-            var.x_n: 5,
-            var.x_s: 5,
-            var.x_p: 5,
-            var.r_n: 5,
-            var.r_p: 5,
-            var.R_n: 3,
-            var.R_p: 3,
-            var.y: 5,
-            var.z: 5,
-        }
-
-    def test_basic_processing(self):
-        options = {"particle size": "distribution"}
-        model = pybamm.lithium_ion.DFN(options)
-        modeltest = tests.StandardModelTest(
-            model, parameter_values=self.params, var_pts=self.var_pts
-        )
-        modeltest.test_all()
-
-    def test_uniform_profile(self):
-        options = {"particle size": "distribution", "particle": "uniform profile"}
-        model = pybamm.lithium_ion.DFN(options)
-        modeltest = tests.StandardModelTest(
-            model, parameter_values=self.params, var_pts=self.var_pts
-        )
-        modeltest.test_all()
-
-    def test_basic_processing_4D(self):
-        # 4 dimensions: particle, particle size, electrode, current collector
-        options = {
-            "particle size": "distribution",
-            "current collector": "potential pair",
-            "dimensionality": 1,
-        }
-        model = pybamm.lithium_ion.DFN(options)
-        modeltest = tests.StandardModelTest(
-            model, parameter_values=self.params, var_pts=self.var_pts
-        )
-        modeltest.test_all(skip_output_tests=True)
-
-    def test_conservation_each_electrode(self):
-        # Test that surface areas are being calculated from the distribution correctly
-        # for any discretization in the size domain.
-        # We test that the amount of lithium removed or added to each electrode
-        # is the same as for the standard DFN with the same parameters
-        models = [
-            pybamm.lithium_ion.DFN(),
-            pybamm.lithium_ion.DFN(options={"particle size": "distribution"}),
-        ]
-        var = pybamm.standard_spatial_vars
-
-        # reduce number of particle sizes, for a crude discretization
-        var_pts = {
-            var.R_n: 3,
-            var.R_p: 3,
-        }
-        solver = pybamm.CasadiSolver(mode="fast")
-
-        # solve
-        neg_Li = []
-        pos_Li = []
-        for model in models:
-            sim = pybamm.Simulation(
-                model, parameter_values=self.params, var_pts=self.var_pts, solver=solver
-            )
-            sim.var_pts.update(var_pts)
-            solution = sim.solve([0, 3500])
-            neg = solution["Total lithium in negative electrode [mol]"].entries[-1]
-            pos = solution["Total lithium in positive electrode [mol]"].entries[-1]
-            neg_Li.append(neg)
-            pos_Li.append(pos)
-
-        # compare
-        np.testing.assert_array_almost_equal(neg_Li[0], neg_Li[1], decimal=12)
-        np.testing.assert_array_almost_equal(pos_Li[0], pos_Li[1], decimal=12)
 
 
 if __name__ == "__main__":

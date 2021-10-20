@@ -11,7 +11,8 @@ class BaseModel(pybamm.BaseSubModel):
     ----------
     param : parameter class
         The parameters to use for this submodel
-
+    reactions : dict, optional
+        Dictionary of reaction terms
 
     **Extends:** :class:`pybamm.BaseSubModel`
     """
@@ -19,10 +20,17 @@ class BaseModel(pybamm.BaseSubModel):
     def __init__(self, param):
         super().__init__(param)
 
-    def _get_standard_concentration_variables(self, c_ox_n, c_ox_s, c_ox_p):
+    def _get_standard_concentration_variables(self, c_ox):
         """
         A private function to obtain the standard variables which
         can be derived from the concentration of oxygen.
+
+        Parameters
+        ----------
+        c_ox : :class:`pybamm.Symbol`
+            The concentration of oxygen.
+        c_ox_av : :class:`pybamm.Symbol`
+            The cell-averaged concentration of oxygen.
 
         Returns
         -------
@@ -31,9 +39,9 @@ class BaseModel(pybamm.BaseSubModel):
             oxygen.
         """
 
-        c_ox_typ = self.param.c_ox_typ
-        c_ox = pybamm.concatenation(c_ox_n, c_ox_s, c_ox_p)
         c_ox_av = pybamm.x_average(c_ox)
+        c_ox_typ = self.param.c_ox_typ
+        c_ox_n, c_ox_s, c_ox_p = c_ox.orphans
 
         variables = {
             "Oxygen concentration": c_ox,

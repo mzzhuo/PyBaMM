@@ -3,10 +3,9 @@
 #
 import pybamm
 import numpy as np
-from .base_parameters import BaseParameters
 
 
-class ElectricalParameters(BaseParameters):
+class ElectricalParameters:
     """
     Standard electrical parameters
 

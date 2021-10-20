@@ -44,7 +44,6 @@ out/
 config.py
 matplotlibrc
 *.pickle
-*.sav
 
 # ideas
 ideas/
@@ -94,6 +93,7 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 *.so
+*.json
 
 third-party/pybind11
 pybind11/
@@ -104,14 +104,8 @@ KLU_module_deps
 # setup
 setup.log
 
-# test
-test.c
-
 # tox
 .tox/
 
 # julia
 Manifest.toml
-
-# vcpkg
-vcpkg_installed/

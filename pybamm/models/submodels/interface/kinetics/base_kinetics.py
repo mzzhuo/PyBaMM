@@ -26,7 +26,8 @@ class BaseKinetics(BaseInterface):
     """
 
     def __init__(self, param, domain, reaction, options):
-        super().__init__(param, domain, reaction, options=options)
+        super().__init__(param, domain, reaction)
+        self.options = options
 
     def get_fundamental_variables(self):
         if (
@@ -51,34 +52,13 @@ class BaseKinetics(BaseInterface):
             return {}
 
     def get_coupled_variables(self, variables):
-        if self.reaction == "lithium metal plating":  # li metal electrode (half-cell)
-            delta_phi = variables[
-                "Lithium metal interface surface potential difference"
-            ]
-        else:
-            # Calculate delta_phi from phi_s and phi_e if it isn't already known
-            if self.domain + " electrode surface potential difference" not in variables:
-                phi_s = variables[self.domain + " electrode potential"]
-                phi_e = variables[self.domain + " electrolyte potential"]
-                delta_phi = phi_s - phi_e
-                variables.update(
-                    self._get_standard_surface_potential_difference_variables(delta_phi)
-                )
-            delta_phi = variables[
-                self.domain + " electrode surface potential difference"
-            ]
-            # If delta_phi was broadcast, take only the orphan.
-            if isinstance(delta_phi, pybamm.Broadcast):
-                delta_phi = delta_phi.orphans[0]
-        # For "particle-size distribution" models, delta_phi must then be
-        # broadcast to "particle size" domain
-        if (
-            self.reaction == "lithium-ion main"
-            and self.options["particle size"] == "distribution"
-        ):
-            delta_phi = pybamm.PrimaryBroadcast(
-                delta_phi, [self.domain.lower() + " particle size"]
-            )
+        # Calculate delta_phi from phi_s and phi_e if it isn't already known
+        if self.domain + " electrode surface potential difference" not in variables:
+            variables = self._get_delta_phi(variables)
+        delta_phi = variables[self.domain + " electrode surface potential difference"]
+        # If delta_phi was broadcast, take only the orphan
+        if isinstance(delta_phi, pybamm.Broadcast):
+            delta_phi = delta_phi.orphans[0]
 
         # Get exchange-current density
         j0 = self._get_exchange_current_density(variables)
@@ -90,60 +70,46 @@ class BaseKinetics(BaseInterface):
         j_tot_av = self._get_average_total_interfacial_current_density(variables)
         # j = j_tot_av + (j - pybamm.x_average(j))  # enforce true average
 
-        # Add SEI resistance in the negative electrode
-        if self.domain == "Negative":
-            if self.half_cell or self.options["SEI film resistance"] == "average":
-                R_sei = self.param.R_sei
-                L_sei = variables["Total SEI thickness"]
-                eta_sei = -j_tot_av * L_sei * R_sei
-            elif self.options["SEI film resistance"] == "distributed":
-                R_sei = self.param.R_sei
-                L_sei = variables["Total SEI thickness"]
-                j_tot = variables[
-                    "Total negative electrode interfacial current density variable"
-                ]
-                eta_sei = -j_tot * L_sei * R_sei
-            else:
-                eta_sei = pybamm.Scalar(0)
-            eta_r += eta_sei
+        # Add SEI resistance
+        if self.options["SEI film resistance"] == "distributed":
+            if self.domain == "Negative":
+                R_sei = self.param.R_sei_n
+            elif self.domain == "Positive":
+                R_sei = self.param.R_sei_p
+            L_sei = variables[
+                "Total " + self.domain.lower() + " electrode SEI thickness"
+            ]
+            j_tot = variables[
+                "Total "
+                + self.domain.lower()
+                + " electrode interfacial current density variable"
+            ]
+            eta_sei = -j_tot * L_sei * R_sei
+        elif self.options["SEI film resistance"] == "average":
+            if self.domain == "Negative":
+                R_sei = self.param.R_sei_n
+            elif self.domain == "Positive":
+                R_sei = self.param.R_sei_p
+            L_sei = variables[
+                "Total " + self.domain.lower() + " electrode SEI thickness"
+            ]
+            eta_sei = -j_tot_av * L_sei * R_sei
+        else:
+            eta_sei = pybamm.Scalar(0)
+        eta_r += eta_sei
 
         # Get number of electrons in reaction
         ne = self._get_number_of_electrons_in_reaction()
         # Get kinetics. Note: T must have the same domain as j0 and eta_r
         if j0.domain in ["current collector", ["current collector"]]:
             T = variables["X-averaged cell temperature"]
-        elif j0.domain == [self.domain.lower() + " particle size"]:
-            if j0.domains["secondary"] != [self.domain.lower() + " electrode"]:
-                T = variables["X-averaged cell temperature"]
-            else:
-                T = variables[self.domain + " electrode temperature"]
-
-            # Broadcast T onto "particle size" domain
-            T = pybamm.PrimaryBroadcast(T, [self.domain.lower() + " particle size"])
         else:
             T = variables[self.domain + " electrode temperature"]
 
         # Update j, except in the "distributed SEI resistance" model, where j will be
-        # found by solving an algebraic equation.
+        # found by solving an algebraic equation
         # (In the "distributed SEI resistance" model, we have already defined j)
         j = self._get_kinetics(j0, ne, eta_r, T)
-
-        if j.domain == [self.domain.lower() + " particle size"]:
-            # If j depends on particle size, get size-dependent "distribution"
-            # variables first
-            variables.update(
-                self._get_standard_size_distribution_interfacial_current_variables(j)
-            )
-            variables.update(
-                self._get_standard_size_distribution_exchange_current_variables(j0)
-            )
-            variables.update(
-                self._get_standard_size_distribution_overpotential_variables(eta_r)
-            )
-            variables.update(
-                self._get_standard_size_distribution_ocp_variables(ocp, dUdT)
-            )
-
         variables.update(self._get_standard_interfacial_current_variables(j))
 
         variables.update(
@@ -153,30 +119,17 @@ class BaseKinetics(BaseInterface):
         variables.update(self._get_standard_overpotential_variables(eta_r))
         variables.update(self._get_standard_ocp_variables(ocp, dUdT))
 
-        if self.domain == "Negative" and self.reaction in [
-            "lithium-ion main",
-            "lithium metal plating",
-            "lead-acid main",
-        ]:
+        if "main" in self.reaction:
             variables.update(
                 self._get_standard_sei_film_overpotential_variables(eta_sei)
             )
 
         if (
-            (
-                self.half_cell
-                or (
-                    "Negative electrode"
-                    + self.reaction_name
-                    + " interfacial current density"
-                )
-                in variables
-            )
-            and (
-                "Positive electrode"
-                + self.reaction_name
-                + " interfacial current density"
-            )
+            "Negative electrode" + self.reaction_name + " interfacial current density"
+            in variables
+            and "Positive electrode"
+            + self.reaction_name
+            + " interfacial current density"
             in variables
             and self.Reaction_icd not in variables
         ):

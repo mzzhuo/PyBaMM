@@ -17,9 +17,8 @@ class BaseModel(pybamm.BaseBatteryModel):
 
     def __init__(self, options=None, name="Unnamed lead-acid model", build=False):
         options = options or {}
-        # Specify that there are no particles in lead-acid, and no half-cell models
+        # Specify that there are no particles in lead-acid
         options["particle shape"] = "no particles"
-        self.half_cell = False
         super().__init__(options, name)
         self.param = pybamm.LeadAcidParameters()
 
@@ -81,8 +80,14 @@ class BaseModel(pybamm.BaseBatteryModel):
 
     def set_sei_submodel(self):
 
-        self.submodels["sei"] = pybamm.sei.NoSEI(self.param)
+        self.submodels["negative sei"] = pybamm.sei.NoSEI(self.param, "Negative")
+        self.submodels["positive sei"] = pybamm.sei.NoSEI(self.param, "Positive")
 
     def set_lithium_plating_submodel(self):
 
-        self.submodels["lithium plating"] = pybamm.lithium_plating.NoPlating(self.param)
+        self.submodels["negative lithium plating"] = pybamm.lithium_plating.NoPlating(
+            self.param, "Negative"
+        )
+        self.submodels["positive lithium plating"] = pybamm.lithium_plating.NoPlating(
+            self.param, "Positive"
+        )

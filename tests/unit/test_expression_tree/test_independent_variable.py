@@ -1,11 +1,9 @@
 #
 # Tests for the Parameter class
 #
-import unittest
-
-import sympy
-
 import pybamm
+
+import unittest
 
 
 class TestIndependentVariable(unittest.TestCase):
@@ -63,19 +61,6 @@ class TestIndependentVariable(unittest.TestCase):
         x = pybamm.SpatialVariableEdge("x", "negative electrode")
         self.assertEqual(x.name, "x")
         self.assertTrue(x.evaluates_on_edges("primary"))
-
-    def test_to_equation(self):
-        # Test print_name
-        func = pybamm.IndependentVariable("a")
-        func.print_name = "test"
-        self.assertEqual(func.to_equation(), sympy.Symbol("test"))
-
-        self.assertEqual(
-            pybamm.IndependentVariable("a").to_equation(), sympy.Symbol("a")
-        )
-
-        # Test time
-        self.assertEqual(pybamm.t.to_equation(), sympy.Symbol("t"))
 
 
 if __name__ == "__main__":

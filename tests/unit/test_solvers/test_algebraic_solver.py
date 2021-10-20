@@ -38,14 +38,13 @@ class TestAlgebraicSolver(unittest.TestCase):
 
     def test_simple_root_find(self):
         # Simple system: a single algebraic equation
-        class Model(pybamm.BaseModel):
+        class Model:
             y0 = np.array([2])
             rhs = {}
             timescale_eval = 1
             length_scales = {}
             jac_algebraic_eval = None
             convert_to_format = "python"
-            len_rhs_and_alg = 1
 
             def algebraic_eval(self, t, y, inputs):
                 return y + 2
@@ -62,14 +61,13 @@ class TestAlgebraicSolver(unittest.TestCase):
         self.assertNotEqual(solution.y, -2)
 
     def test_root_find_fail(self):
-        class Model(pybamm.BaseModel):
+        class Model:
             y0 = np.array([2])
             rhs = {}
             timescale_eval = 1
             length_scales = {}
             jac_algebraic_eval = None
             convert_to_format = "casadi"
-            len_rhs_and_alg = 1
 
             def algebraic_eval(self, t, y, inputs):
                 # algebraic equation has no real root
@@ -94,13 +92,12 @@ class TestAlgebraicSolver(unittest.TestCase):
         A = np.array([[4, 3], [1, -1]])
         b = np.array([0, 7])
 
-        class Model(pybamm.BaseModel):
+        class Model:
             y0 = np.zeros(2)
             rhs = {}
             timescale_eval = 1
             length_scales = {}
             convert_to_format = "python"
-            len_rhs_and_alg = 2
 
             def algebraic_eval(self, t, y, inputs):
                 return A @ y - b

@@ -32,8 +32,6 @@ class DFN(BaseModel):
 
     def __init__(self, options=None, name="Doyle-Fuller-Newman model", build=True):
         super().__init__(options, name)
-        # For degradation models we use the full form since this is a full-order model
-        self.x_average = False
 
         self.set_external_circuit_submodel()
         self.set_porosity_submodel()
@@ -51,32 +49,57 @@ class DFN(BaseModel):
         self.set_sei_submodel()
         self.set_lithium_plating_submodel()
 
-        # For half-cell models, remove negative electrode submodels
-        # that are not needed before building
-        # We do this whether the working electrode is 'positive' or 'negative' since
-        # the half-cell models are always defined assuming the positive electrode is
-        # the working electrode
-        # It's ok to only do this now since `build_model` is the expensive part
-        if self.options["working electrode"] != "both":
-            self.submodels = {
-                k: v for k, v in self.submodels.items() if not k.startswith("negative")
-            }
-        # Models added specifically for the counter electrode should be labelled with
-        # "counter electrode" so as not to be caught by this check
-
         if build:
             self.build_model()
 
         pybamm.citations.register("Doyle1993")
 
+    def set_porosity_submodel(self):
+
+        if self.options["SEI porosity change"] == "false":
+            self.submodels["porosity"] = pybamm.porosity.Constant(self.param)
+        elif self.options["SEI porosity change"] == "true":
+            self.submodels["porosity"] = pybamm.porosity.Full(self.param)
+
+    def set_active_material_submodel(self):
+
+        if self.options["loss of active material"] == "none":
+            self.submodels[
+                "negative active material"
+            ] = pybamm.active_material.Constant(self.param, "Negative", self.options)
+            self.submodels[
+                "positive active material"
+            ] = pybamm.active_material.Constant(self.param, "Positive", self.options)
+        elif self.options["loss of active material"] == "both":
+            self.submodels[
+                "negative active material"
+            ] = pybamm.active_material.VaryingFull(self.param, "Negative", self.options)
+            self.submodels[
+                "positive active material"
+            ] = pybamm.active_material.VaryingFull(self.param, "Positive", self.options)
+        elif self.options["loss of active material"] == "negative":
+            self.submodels[
+                "negative active material"
+            ] = pybamm.active_material.VaryingFull(self.param, "Negative", self.options)
+            self.submodels[
+                "positive active material"
+            ] = pybamm.active_material.Constant(self.param, "Positive", self.options)
+        elif self.options["loss of active material"] == "positive":
+            self.submodels[
+                "negative active material"
+            ] = pybamm.active_material.Constant(self.param, "Negative", self.options)
+            self.submodels[
+                "positive active material"
+            ] = pybamm.active_material.VaryingFull(self.param, "Positive", self.options)
+
     def set_convection_submodel(self):
 
         self.submodels[
             "transverse convection"
-        ] = pybamm.convection.transverse.NoConvection(self.param, self.options)
+        ] = pybamm.convection.transverse.NoConvection(self.param)
         self.submodels[
             "through-cell convection"
-        ] = pybamm.convection.through_cell.NoConvection(self.param, self.options)
+        ] = pybamm.convection.through_cell.NoConvection(self.param)
 
     def set_interfacial_submodel(self):
 
@@ -87,78 +110,36 @@ class DFN(BaseModel):
             self.param, "Positive", "lithium-ion main", self.options
         )
 
-        # Set the counter-electrode model for the half-cell model
-        # The negative electrode model will be ignored
-        if self.half_cell:
-            if self.options["SEI"] in ["none", "constant"]:
-                self.submodels[
-                    "counter electrode interface"
-                ] = pybamm.interface.InverseButlerVolmer(
-                    self.param, "Negative", "lithium metal plating", self.options
-                )  # assuming symmetric reaction for now so we can take the inverse
-                self.submodels[
-                    "counter electrode interface current"
-                ] = pybamm.interface.CurrentForInverseButlerVolmerLithiumMetal(
-                    self.param, "Negative", "lithium metal plating", self.options
-                )
-            else:
-                self.submodels[
-                    "counter electrode interface"
-                ] = pybamm.interface.ButlerVolmer(
-                    self.param, "Negative", "lithium metal plating", self.options
-                )
-
     def set_particle_submodel(self):
 
-        if isinstance(self.options["particle"], str):
-            particle_left = self.options["particle"]
-            particle_right = self.options["particle"]
-        else:
-            particle_left, particle_right = self.options["particle"]
-        for particle_side, domain in [
-            [particle_left, "Negative"],
-            [particle_right, "Positive"],
+        if self.options["particle"] == "Fickian diffusion":
+            self.submodels["negative particle"] = pybamm.particle.FickianManyParticles(
+                self.param, "Negative"
+            )
+            self.submodels["positive particle"] = pybamm.particle.FickianManyParticles(
+                self.param, "Positive"
+            )
+        elif self.options["particle"] in [
+            "uniform profile",
+            "quadratic profile",
+            "quartic profile",
         ]:
-            if self.options["particle size"] == "single":
-                if particle_side == "Fickian diffusion":
-                    self.submodels[
-                        domain.lower() + " particle"
-                    ] = pybamm.particle.no_distribution.FickianDiffusion(
-                        self.param, domain
-                    )
-                elif particle_side in [
-                    "uniform profile",
-                    "quadratic profile",
-                    "quartic profile",
-                ]:
-                    self.submodels[
-                        domain.lower() + " particle"
-                    ] = pybamm.particle.no_distribution.PolynomialProfile(
-                        self.param, domain, particle_side
-                    )
-            elif self.options["particle size"] == "distribution":
-                if particle_side == "Fickian diffusion":
-                    self.submodels[
-                        domain.lower() + " particle"
-                    ] = pybamm.particle.size_distribution.FickianDiffusion(
-                        self.param, domain
-                    )
-                elif particle_side in [
-                    "uniform profile",
-                    "quadratic profile",
-                    "quartic profile",
-                ]:
-                    self.submodels[
-                        domain.lower() + " particle"
-                    ] = pybamm.particle.size_distribution.UniformProfile(
-                        self.param, domain
-                    )
+            self.submodels[
+                "negative particle"
+            ] = pybamm.particle.PolynomialManyParticles(
+                self.param, "Negative", self.options["particle"]
+            )
+            self.submodels[
+                "positive particle"
+            ] = pybamm.particle.PolynomialManyParticles(
+                self.param, "Positive", self.options["particle"]
+            )
 
     def set_solid_submodel(self):
 
         if self.options["surface form"] == "false":
-            submod_n = pybamm.electrode.ohm.Full(self.param, "Negative", self.options)
-            submod_p = pybamm.electrode.ohm.Full(self.param, "Positive", self.options)
+            submod_n = pybamm.electrode.ohm.Full(self.param, "Negative")
+            submod_p = pybamm.electrode.ohm.Full(self.param, "Positive")
         else:
             submod_n = pybamm.electrode.ohm.SurfaceForm(self.param, "Negative")
             submod_p = pybamm.electrode.ohm.SurfaceForm(self.param, "Positive")
@@ -166,26 +147,12 @@ class DFN(BaseModel):
         self.submodels["negative electrode potential"] = submod_n
         self.submodels["positive electrode potential"] = submod_p
 
-        # Set the counter-electrode model for the half-cell model
-        # The negative electrode model will be ignored
-        if self.half_cell:
-            if self.options["SEI"] in ["none", "constant"]:
-                self.submodels[
-                    "counter electrode potential"
-                ] = pybamm.electrode.ohm.LithiumMetalExplicit(self.param, self.options)
-            else:
-                self.submodels[
-                    "counter electrode potential"
-                ] = pybamm.electrode.ohm.LithiumMetalSurfaceForm(
-                    self.param, self.options
-                )
-
     def set_electrolyte_submodel(self):
 
         surf_form = pybamm.electrolyte_conductivity.surface_potential_form
 
         self.submodels["electrolyte diffusion"] = pybamm.electrolyte_diffusion.Full(
-            self.param, self.options
+            self.param
         )
 
         if self.options["electrolyte conductivity"] not in ["default", "full"]:
@@ -198,7 +165,7 @@ class DFN(BaseModel):
         if self.options["surface form"] == "false":
             self.submodels[
                 "electrolyte conductivity"
-            ] = pybamm.electrolyte_conductivity.Full(self.param, self.options)
+            ] = pybamm.electrolyte_conductivity.Full(self.param)
         elif self.options["surface form"] == "differential":
             for domain in ["Negative", "Separator", "Positive"]:
                 self.submodels[

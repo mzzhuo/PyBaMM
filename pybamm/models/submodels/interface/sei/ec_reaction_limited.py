@@ -14,31 +14,21 @@ class EcReactionLimited(BaseModel):
     ----------
     param : parameter class
         The parameters to use for this submodel
-    reaction_loc : str
-        Where the reaction happens: "x-average" (SPM, SPMe, etc),
-        "full electrode" (full DFN), or "interface" (half-cell DFN)
-    options : dict, optional
-        A dictionary of options to be passed to the model.
+    domain : str
+        The domain of the model either 'Negative' or 'Positive'
 
     **Extends:** :class:`pybamm.sei.BaseModel`
     """
 
-    def __init__(self, param, reaction_loc, options=None):
-        super().__init__(param, options=options)
-        self.reaction_loc = reaction_loc
+    def __init__(self, param, domain):
+        super().__init__(param, domain)
 
     def get_fundamental_variables(self):
 
-        if self.reaction_loc == "x-average":
-            L_inner = pybamm.FullBroadcast(0, "negative electrode", "current collector")
-            L_outer_av = pybamm.standard_variables.L_outer_av
-            L_outer = pybamm.PrimaryBroadcast(L_outer_av, "negative electrode")
-        elif self.reaction_loc == "full electrode":
-            L_inner = pybamm.FullBroadcast(0, "negative electrode", "current collector")
-            L_outer = pybamm.standard_variables.L_outer
-        elif self.reaction_loc == "interface":
-            L_inner = pybamm.PrimaryBroadcast(0, "current collector")
-            L_outer = pybamm.standard_variables.L_outer_interface
+        L_inner = pybamm.FullBroadcast(
+            0, self.domain.lower() + " electrode", "current collector"
+        )
+        L_outer = pybamm.standard_variables.L_outer
 
         variables = self._get_standard_thickness_variables(L_inner, L_outer)
         variables.update(self._get_standard_concentration_variables(variables))
@@ -46,25 +36,17 @@ class EcReactionLimited(BaseModel):
         return variables
 
     def get_coupled_variables(self, variables):
-        # delta_phi = phi_s - phi_e
-        if self.reaction_loc == "interface":
-            delta_phi = variables[
-                "Lithium metal interface surface potential difference"
-            ]
-        else:
-            delta_phi = variables["Negative electrode surface potential difference"]
-
-        L_sei = variables["Outer SEI thickness"]
+        phi_s_n = variables[self.domain + " electrode potential"]
+        phi_e_n = variables[self.domain + " electrolyte potential"]
+        L_sei = variables["Outer " + self.domain.lower() + " electrode SEI thickness"]
 
         # Look for current that contributes to the -IR drop
         # If we can't find the interfacial current density from the main reaction, j,
         # it's ok to fall back on the total interfacial current density, j_tot
         # This should only happen when the interface submodel is "InverseButlerVolmer"
         # in which case j = j_tot (uniform) anyway
-        if "Negative electrode interfacial current density" in variables:
-            j = variables["Negative electrode interfacial current density"]
-        elif self.reaction_loc == "interface":
-            j = variables["Lithium metal total interfacial current density"]
+        if self.domain + " electrode interfacial current density" in variables:
+            j = variables[self.domain + " electrode interfacial current density"]
         else:
             j = variables[
                 "X-averaged "
@@ -72,9 +54,10 @@ class EcReactionLimited(BaseModel):
                 + " electrode total interfacial current density"
             ]
 
-        C_sei_ec = self.param.C_sei_ec
-        R_sei = self.param.R_sei
-        C_ec = self.param.C_ec
+        if self.domain == "Negative":
+            C_sei_ec = self.param.C_sei_ec_n
+            R_sei = self.param.R_sei_n
+            C_ec = self.param.C_ec_n
 
         # we have a linear system for j_sei and c_ec
         #  c_ec = 1 + j_sei * L_sei * C_ec
@@ -85,14 +68,15 @@ class EcReactionLimited(BaseModel):
         #  j_sei = -C_sei_ec * exp() / (1 + L_sei * C_ec * C_sei_ec * exp())
         #  c_ec = 1 / (1 + L_sei * C_ec * C_sei_ec * exp())
         # need to revise for thermal case
-        C_sei_exp = C_sei_ec * pybamm.exp(-0.5 * (delta_phi - j * L_sei * R_sei))
+        C_sei_exp = C_sei_ec * pybamm.exp(
+            -0.5 * (phi_s_n - phi_e_n - j * L_sei * R_sei)
+        )
         j_sei = -C_sei_exp / (1 + L_sei * C_ec * C_sei_exp)
         c_ec = 1 / (1 + L_sei * C_ec * C_sei_exp)
 
-        if self.reaction_loc == "interface":
-            j_inner = pybamm.PrimaryBroadcast(0, "current collector")
-        else:
-            j_inner = pybamm.FullBroadcast(0, "negative electrode", "current collector")
+        j_inner = pybamm.FullBroadcast(
+            0, self.domain.lower() + " electrode", "current collector"
+        )
         j_outer = j_sei
 
         variables.update(self._get_standard_reaction_variables(j_inner, j_outer))
@@ -103,35 +87,42 @@ class EcReactionLimited(BaseModel):
 
         variables.update(
             {
-                "EC surface concentration": c_ec,
-                "EC surface concentration [mol.m-3]": c_ec * c_ec_scale,
-                "X-averaged EC surface concentration": c_ec_av,
-                "X-averaged EC surface concentration [mol.m-3]": c_ec_av * c_ec_scale,
+                self.domain + " electrode EC surface concentration": c_ec,
+                self.domain
+                + " electrode EC surface concentration [mol.m-3]": c_ec * c_ec_scale,
+                "X-averaged "
+                + self.domain.lower()
+                + " electrode EC surface concentration": c_ec_av,
+                "X-averaged "
+                + self.domain.lower()
+                + " electrode EC surface concentration [mol.m-3]": c_ec_av * c_ec_scale,
             }
         )
 
         # Update whole cell variables, which also updates the "sum of" variables
-        variables.update(super().get_coupled_variables(variables))
+        if (
+            "Negative electrode SEI interfacial current density" in variables
+            and "Positive electrode SEI interfacial current density" in variables
+            and "SEI interfacial current density" not in variables
+        ):
+            variables.update(
+                self._get_standard_whole_cell_interfacial_current_variables(variables)
+            )
 
         return variables
 
     def set_rhs(self, variables):
-        if self.reaction_loc == "x-average":
-            L_sei = variables["X-averaged outer SEI thickness"]
-            j_sei = variables["X-averaged outer SEI interfacial current density"]
-        else:
-            L_sei = variables["Outer SEI thickness"]
-            j_sei = variables["Outer SEI interfacial current density"]
+        domain = self.domain.lower() + " electrode"
+        L_sei = variables["Outer " + domain + " SEI thickness"]
+        j_sei = variables["Outer " + domain + " SEI interfacial current density"]
 
-        Gamma_SEI = self.param.Gamma_SEI
+        if self.domain == "Negative":
+            Gamma_SEI = self.param.Gamma_SEI_n
 
         self.rhs = {L_sei: -Gamma_SEI * j_sei / 2}
 
     def set_initial_conditions(self, variables):
-        if self.reaction_loc == "x-average":
-            L_sei = variables["X-averaged outer SEI thickness"]
-        else:
-            L_sei = variables["Outer SEI thickness"]
+        L_sei = variables["Outer " + self.domain.lower() + " electrode SEI thickness"]
         L_sei_0 = pybamm.Scalar(1)
 
         self.initial_conditions = {L_sei: L_sei_0}

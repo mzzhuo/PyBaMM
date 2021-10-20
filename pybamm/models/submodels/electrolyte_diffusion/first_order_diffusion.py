@@ -14,7 +14,8 @@ class FirstOrder(BaseElectrolyteDiffusion):
     ----------
     param : parameter class
         The parameters to use for this submodel
-
+    reactions : dict
+        Dictionary of reaction terms
 
     **Extends:** :class:`pybamm.electrolyte_diffusion.BaseElectrolyteDiffusion`
     """
@@ -132,18 +133,18 @@ class FirstOrder(BaseElectrolyteDiffusion):
             }
         )
 
-        N_e = pybamm.concatenation(
+        N_e = pybamm.Concatenation(
             param.C_e * N_e_n_1, param.C_e * N_e_s_1, param.C_e * N_e_p_1
         )
         variables.update(self._get_standard_flux_variables(N_e))
 
-        c_e = pybamm.concatenation(c_e_n, c_e_s, c_e_p)
-        eps = pybamm.concatenation(
+        c_e = pybamm.Concatenation(c_e_n, c_e_s, c_e_p)
+        eps = pybamm.Concatenation(
             pybamm.PrimaryBroadcast(eps_n_0, "negative electrode"),
             pybamm.PrimaryBroadcast(eps_s_0, "separator"),
             pybamm.PrimaryBroadcast(eps_p_0, "positive electrode"),
         )
 
-        variables.update(self._get_total_concentration_electrolyte(eps * c_e))
+        variables.update(self._get_total_concentration_electrolyte(c_e, eps))
 
         return variables

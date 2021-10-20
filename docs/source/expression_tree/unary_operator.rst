@@ -28,7 +28,7 @@ Unary Operators
 .. autoclass:: pybamm.Laplacian
   :members:
 
-.. autoclass:: pybamm.GradientSquared
+.. autoclass:: pybamm.Gradient_Squared
   :members:
 
 .. autoclass:: pybamm.Mass
@@ -80,8 +80,6 @@ Unary Operators
 .. autofunction:: pybamm.x_average
 
 .. autofunction:: pybamm.r_average
-
-.. autofunction:: pybamm.size_average
 
 .. autofunction:: pybamm.z_average
 

@@ -16,64 +16,51 @@ class TestUtil(unittest.TestCase):
     """
 
     def test_load_function(self):
-        # Test replace function and deprecation warning for lithium-ion
-        with self.assertWarns(Warning):
-            warn_path = os.path.join(
-                "pybamm",
-                "input",
-                "parameters",
-                "lithium-ion",
-                "negative_electrodes",
-                "graphite_Chen2020",
-                "graphite_LGM50_electrolyte_exchange_current_density_Chen2020.py",
-            )
-            pybamm.load_function(warn_path)
+        # Test filename ends in '.py'
+        with self.assertRaisesRegex(
+            ValueError, "Expected filename.py, but got doesnotendindotpy"
+        ):
+            pybamm.load_function("doesnotendindotpy")
 
-        # Test replace function and deprecation warning for lead-acid
-        with self.assertWarns(Warning):
-            warn_path = os.path.join(
-                "pybamm",
-                "input",
-                "parameters",
-                "lead-acid",
-                "negative_electrodes",
-                "lead_Sulzer2019",
-                "lead_exchange_current_density_Sulzer2019.py",
-            )
-            pybamm.load_function(warn_path)
+        # Test exception if absolute file not found
+        with self.assertRaisesRegex(
+            ValueError, "is an absolute path, but the file is not found"
+        ):
+            nonexistent_abs_file = os.path.join(os.getcwd(), "i_dont_exist.py")
+            pybamm.load_function(nonexistent_abs_file)
+
+        # Test exception if relative file not found
+        with self.assertRaisesRegex(
+            ValueError, "cannot be found in the PyBaMM directory"
+        ):
+            pybamm.load_function("i_dont_exist.py")
+
+        # Test exception if relative file found more than once
+        with self.assertRaisesRegex(
+            ValueError, "found multiple times in the PyBaMM directory"
+        ):
+            pybamm.load_function("__init__.py")
+
+        # Test exception if no matching function found in module
+        with self.assertRaisesRegex(ValueError, "No function .+ found in module .+"):
+            pybamm.load_function("process_symbol_bad_function.py")
 
         # Test function load with absolute path
         abs_test_path = os.path.join(
             pybamm.root_dir(),
-            "pybamm",
-            "input",
-            "parameters",
-            "lithium_ion",
-            "negative_electrodes",
-            "graphite_Chen2020",
-            "graphite_LGM50_electrolyte_exchange_current_density_Chen2020.py",
+            "tests",
+            "unit",
+            "test_parameters",
+            "data",
+            "process_symbol_test_function.py",
         )
+        self.assertTrue(os.path.isfile(abs_test_path))
         func = pybamm.load_function(abs_test_path)
-        self.assertEqual(
-            func,
-            pybamm.input.parameters.lithium_ion.negative_electrodes.graphite_Chen2020.graphite_LGM50_electrolyte_exchange_current_density_Chen2020.graphite_LGM50_electrolyte_exchange_current_density_Chen2020,  # noqa
-        )
+        self.assertEqual(func(2), 246)
 
         # Test function load with relative path
-        rel_test_path = os.path.join(
-            "pybamm",
-            "input",
-            "parameters",
-            "lithium_ion",
-            "negative_electrodes",
-            "graphite_Chen2020",
-            "graphite_LGM50_electrolyte_exchange_current_density_Chen2020.py",
-        )
-        func = pybamm.load_function(rel_test_path)
-        self.assertEqual(
-            func,
-            pybamm.input.parameters.lithium_ion.negative_electrodes.graphite_Chen2020.graphite_LGM50_electrolyte_exchange_current_density_Chen2020.graphite_LGM50_electrolyte_exchange_current_density_Chen2020,  # noqa
-        )
+        func = pybamm.load_function("process_symbol_test_function.py")
+        self.assertEqual(func(3), 369)
 
     def test_rmse(self):
         self.assertEqual(pybamm.rmse(np.ones(5), np.zeros(5)), 1)
@@ -94,27 +81,10 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(d[4][5], "y")
 
     def test_fuzzy_dict(self):
-        d = pybamm.FuzzyDict(
-            {
-                "test": 1,
-                "test2": 2,
-                "SEI current": 3,
-                "Lithium plating current": 4,
-            }
-        )
+        d = pybamm.FuzzyDict({"test": 1, "test2": 2})
         self.assertEqual(d["test"], 1)
         with self.assertRaisesRegex(KeyError, "'test3' not found. Best matches are "):
-            d.__getitem__("test3")
-        with self.assertRaisesRegex(
-            KeyError, "'negative electrode SEI current' not found. All SEI parameters"
-        ):
-            d.__getitem__("negative electrode SEI current")
-        with self.assertRaisesRegex(
-            KeyError,
-            "'negative electrode lithium plating current' not found. "
-            "All lithium plating parameters",
-        ):
-            d.__getitem__("negative electrode lithium plating current")
+            d["test3"]
 
     def test_get_parameters_filepath(self):
         tempfile_obj = tempfile.NamedTemporaryFile("w", dir=".")

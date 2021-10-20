@@ -1,2 +1,5 @@
 from .base_particle import BaseParticle
-from . import no_distribution, size_distribution
+from .fickian_many_particles import FickianManyParticles
+from .fickian_single_particle import FickianSingleParticle
+from .polynomial_single_particle import PolynomialSingleParticle
+from .polynomial_many_particles import PolynomialManyParticles

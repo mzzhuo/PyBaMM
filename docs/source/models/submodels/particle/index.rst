@@ -5,5 +5,7 @@ Particle
   :maxdepth: 1
 
   base_particle
-  no_distribution/index
-  size_distribution/index
+  fickian_single_particle
+  fickian_many_particles
+  polynomial_single_particle
+  polynomial_many_particles

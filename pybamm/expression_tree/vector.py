@@ -1,16 +1,16 @@
 #
 # Vector class
 #
-import numpy as np
-
 import pybamm
+
+import numpy as np
 
 
 class Vector(pybamm.Array):
-    """
-    node in the expression tree that holds a vector type (e.g. :class:`numpy.array`)
+    """node in the expression tree that holds a vector type (e.g. :class:`numpy.array`)
 
     **Extends:** :class:`Array`
+
     """
 
     def __init__(

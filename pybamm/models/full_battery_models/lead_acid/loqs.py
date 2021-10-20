@@ -95,8 +95,8 @@ class LOQS(BaseModel):
 
     def set_porosity_submodel(self):
 
-        self.submodels["leading-order porosity"] = pybamm.porosity.ReactionDrivenODE(
-            self.param, self.options, True
+        self.submodels["leading-order porosity"] = pybamm.porosity.LeadingOrder(
+            self.param
         )
 
     def set_tortuosity_submodels(self):
@@ -214,7 +214,7 @@ class LOQS(BaseModel):
         ] = pybamm.electrolyte_diffusion.LeadingOrder(self.param)
 
     def set_side_reaction_submodels(self):
-        if self.options["hydrolysis"] == "true":
+        if "oxygen" in self.options["side reactions"]:
             self.submodels[
                 "leading-order oxygen diffusion"
             ] = pybamm.oxygen_diffusion.LeadingOrder(self.param)

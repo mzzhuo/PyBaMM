@@ -30,7 +30,7 @@ class CurrentCollector1D(BaseThermal):
 
     def __init__(self, param):
         super().__init__(param, cc_dimension=1)
-        pybamm.citations.register("Timms2021")
+        pybamm.citations.register("Timms2020")
 
     def get_fundamental_variables(self):
 
@@ -90,56 +90,39 @@ class CurrentCollector1D(BaseThermal):
         }
 
     def set_boundary_conditions(self, variables):
-        param = self.param
         T_amb = variables["Ambient temperature"]
         T_av = variables["X-averaged cell temperature"]
         T_av_top = pybamm.boundary_value(T_av, "right")
         T_av_bottom = pybamm.boundary_value(T_av, "left")
 
-        # find tab locations (top vs bottom)
-        l_z = param.l_z
-        neg_tab_z = param.centre_z_tab_n
-        pos_tab_z = param.centre_z_tab_p
-        neg_tab_top_bool = pybamm.Equality(neg_tab_z, l_z)
-        neg_tab_bottom_bool = pybamm.Equality(neg_tab_z, 0)
-        pos_tab_top_bool = pybamm.Equality(pos_tab_z, l_z)
-        pos_tab_bottom_bool = pybamm.Equality(pos_tab_z, 0)
+        # Tab cooling only implemented for both tabs at the top.
+        negative_tab_area = self.param.l_tab_n * self.param.l_cn
+        positive_tab_area = self.param.l_tab_p * self.param.l_cp
+        total_top_area = self.param.l * self.param.l_y
+        non_tab_top_area = total_top_area - negative_tab_area - positive_tab_area
 
-        # calculate tab vs non-tab area on top and bottom
-        neg_tab_area = param.l_tab_n * param.l_cn
-        pos_tab_area = param.l_tab_p * param.l_cp
-        total_area = param.l * param.l_y
-
-        non_tab_top_area = (
-            total_area
-            - neg_tab_area * neg_tab_top_bool
-            - pos_tab_area * pos_tab_top_bool
+        negative_tab_cooling_coefficient = (
+            self.param.h_tab_n / self.param.delta * negative_tab_area / total_top_area
         )
-        non_tab_bottom_area = (
-            total_area
-            - neg_tab_area * neg_tab_bottom_bool
-            - pos_tab_area * pos_tab_bottom_bool
+        positive_tab_cooling_coefficient = (
+            self.param.h_tab_p / self.param.delta * positive_tab_area / total_top_area
         )
 
-        # calculate effective cooling coefficients
-        top_cooling_coefficient = (
-            (
-                param.h_tab_n * neg_tab_area * neg_tab_top_bool
-                + param.h_tab_p * pos_tab_area * pos_tab_top_bool
-                + param.h_edge * non_tab_top_area
-            )
-            / param.delta
-            / total_area
+        top_edge_cooling_coefficient = (
+            self.param.h_edge / self.param.delta * non_tab_top_area / total_top_area
         )
-        bottom_cooling_coefficient = (
-            (
-                param.h_tab_n * neg_tab_area * neg_tab_bottom_bool
-                + param.h_tab_p * pos_tab_area * pos_tab_bottom_bool
-                + param.h_edge * non_tab_bottom_area
-            )
-            / param.delta
-            / total_area
+
+        bottom_edge_cooling_coefficient = (
+            self.param.h_edge / self.param.delta * total_top_area / total_top_area
         )
+
+        total_top_cooling_coefficient = (
+            negative_tab_cooling_coefficient
+            + positive_tab_cooling_coefficient
+            + top_edge_cooling_coefficient
+        )
+
+        total_bottom_cooling_coefficient = bottom_edge_cooling_coefficient
 
         # just use left and right for clarity
         # left = bottom of cell (z=0)
@@ -147,11 +130,11 @@ class CurrentCollector1D(BaseThermal):
         self.boundary_conditions = {
             T_av: {
                 "left": (
-                    bottom_cooling_coefficient * (T_av_bottom - T_amb),
+                    total_bottom_cooling_coefficient * (T_av_bottom - T_amb),
                     "Neumann",
                 ),
                 "right": (
-                    -top_cooling_coefficient * (T_av_top - T_amb),
+                    -total_top_cooling_coefficient * (T_av_top - T_amb),
                     "Neumann",
                 ),
             }

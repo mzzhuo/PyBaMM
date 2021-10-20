@@ -4,11 +4,7 @@
 import numpy as np
 import pybamm
 import unittest
-from tests import (
-    get_mesh_for_testing,
-    get_1p1d_mesh_for_testing,
-    get_size_distribution_mesh_for_testing
-)
+from tests import get_mesh_for_testing, get_1p1d_mesh_for_testing
 
 
 class TestSpatialMethod(unittest.TestCase):
@@ -38,7 +34,7 @@ class TestSpatialMethod(unittest.TestCase):
 
     def test_get_auxiliary_domain_repeats(self):
         # Test the method to read number of repeats from auxiliary domains
-        mesh = get_size_distribution_mesh_for_testing()
+        mesh = get_1p1d_mesh_for_testing()
         spatial_method = pybamm.SpatialMethod()
         spatial_method.build(mesh)
 
@@ -74,24 +70,13 @@ class TestSpatialMethod(unittest.TestCase):
 
         # Just tertiary domain
         repeats = spatial_method._get_auxiliary_domain_repeats(
-            {"tertiary": ["current collector"]},
+            {
+                "secondary": ["negative electrode", "separator"],
+                "tertiary": ["current collector"],
+            },
+            tertiary_only=True,
         )
         self.assertEqual(repeats, mesh["current collector"].npts)
-
-        # With quaternary domain
-        repeats = spatial_method._get_auxiliary_domain_repeats(
-            {
-                "secondary": ["negative particle size"],
-                "tertiary": ["negative electrode", "separator"],
-                "quaternary": ["current collector"],
-            }
-        )
-        self.assertEqual(
-            repeats,
-            mesh["negative particle size"].npts
-            * (mesh["negative electrode"].npts + mesh["separator"].npts)
-            * mesh["current collector"].npts,
-        )
 
     def test_discretise_spatial_variable(self):
         # create discretisation

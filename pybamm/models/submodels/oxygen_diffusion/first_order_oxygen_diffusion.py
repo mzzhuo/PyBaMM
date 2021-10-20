@@ -18,7 +18,8 @@ class FirstOrder(BaseModel):
     ----------
     param : parameter class
         The parameters to use for this submodel
-
+    reactions : dict
+        Dictionary of reaction terms
 
     **Extends:** :class:`pybamm.oxygen_diffusion.BaseModel`
     """
@@ -66,13 +67,12 @@ class FirstOrder(BaseModel):
         )
 
         # Update variables
-        variables.update(
-            self._get_standard_concentration_variables(
-                param.C_e * c_ox_n_1, param.C_e * c_ox_s_1, param.C_e * c_ox_p_1
-            )
+        c_ox = pybamm.Concatenation(
+            param.C_e * c_ox_n_1, param.C_e * c_ox_s_1, param.C_e * c_ox_p_1
         )
+        variables.update(self._get_standard_concentration_variables(c_ox))
 
-        N_ox = pybamm.concatenation(
+        N_ox = pybamm.Concatenation(
             param.C_e * N_ox_n_1, param.C_e * N_ox_s_1, param.C_e * N_ox_p_1
         )
         variables.update(self._get_standard_flux_variables(N_ox))

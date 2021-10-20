@@ -1,12 +1,11 @@
 #
 # External circuit with current control
 #
-import pybamm
 from .base_external_circuit import BaseModel, LeadingOrderBaseModel
 
 
 class CurrentControl(BaseModel):
-    """External circuit with current control."""
+    """External circuit with current control. """
 
     def __init__(self, param):
         super().__init__(param)
@@ -18,7 +17,6 @@ class CurrentControl(BaseModel):
         I = self.param.dimensional_current_with_time
 
         variables = {
-            "Current density variable": pybamm.Scalar(1, name="i_cell"),
             "Total current density": i_cell,
             "Total current density [A.m-2]": i_cell_dim,
             "Current [A]": I,
@@ -32,7 +30,7 @@ class CurrentControl(BaseModel):
 
 
 class LeadingOrderCurrentControl(CurrentControl, LeadingOrderBaseModel):
-    """External circuit with current control, for leading order models."""
+    """External circuit with current control, for leading order models. """
 
     def __init__(self, param):
         super().__init__(param)

@@ -38,10 +38,9 @@ class Composite(BaseModel):
             "Leading-order x-averaged " + self.domain.lower() + " electrode tortuosity"
         ]
         phi_s_cn = variables["Negative current collector potential"]
-        T = variables["X-averaged " + self.domain.lower() + " electrode temperature"]
 
         if self._domain == "Negative":
-            sigma_eff_0 = self.param.sigma_n(T) * tor_0
+            sigma_eff_0 = self.param.sigma_n * tor_0
             phi_s = phi_s_cn + (i_boundary_cc_0 / sigma_eff_0) * (
                 x_n * (x_n - 2 * l_n) / (2 * l_n)
             )
@@ -53,7 +52,7 @@ class Composite(BaseModel):
             ]
             phi_e_p_av = variables["X-averaged positive electrolyte potential"]
 
-            sigma_eff_0 = self.param.sigma_p(T) * tor_0
+            sigma_eff_0 = self.param.sigma_p * tor_0
 
             const = (
                 delta_phi_p_av
@@ -81,7 +80,6 @@ class Composite(BaseModel):
             "Leading-order x-averaged " + self.domain.lower() + " electrode tortuosity"
         ]
         i_boundary_cc_0 = variables["Leading-order current collector current density"]
-        T = variables["X-averaged " + self.domain.lower() + " electrode temperature"]
 
         if self.domain == "Negative":
             lbc = (pybamm.Scalar(0), "Dirichlet")
@@ -89,7 +87,7 @@ class Composite(BaseModel):
 
         elif self.domain == "Positive":
             lbc = (pybamm.Scalar(0), "Neumann")
-            sigma_eff_0 = self.param.sigma_p(T) * tor_0
+            sigma_eff_0 = self.param.sigma_p * tor_0
             rbc = (-i_boundary_cc_0 / sigma_eff_0, "Neumann")
 
         self.boundary_conditions[phi_s] = {"left": lbc, "right": rbc}

@@ -9,6 +9,3 @@ Function control external circuit
 
 .. autoclass:: pybamm.external_circuit.PowerFunctionControl
     :members:
-
-.. autoclass:: pybamm.external_circuit.CCCVFunctionControl
-    :members:

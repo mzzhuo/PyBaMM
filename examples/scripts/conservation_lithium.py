@@ -25,9 +25,10 @@ sim.solve()
 solution = sim.solution
 
 t = solution["Time [s]"].entries
+Ne = solution["Total concentration in electrolyte [mol]"].entries
 Np = solution["Total lithium in positive electrode [mol]"].entries
 Nn = solution["Total lithium in negative electrode [mol]"].entries
-Ntot = solution["Total lithium [mol]"].entries
+Ntot = Np + Nn + Ne
 
 fig, ax = plt.subplots(1, 2, figsize=(12, 5))
 

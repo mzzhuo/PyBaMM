@@ -6,6 +6,23 @@ import pybamm
 from .base_oxygen_diffusion import BaseModel
 
 
+def separator_and_positive_only(variable):
+    """Return only the separator and positive electrode children
+
+    Parameters
+    ----------
+    variable : :class:`pybamm.Concatenation`
+        Concatenation of variables in negative, separator, positive
+
+    Returns
+    -------
+    :class:`pybamm.Concatenation`
+        Concatenation of variables in separator and positive only
+    """
+    _, var_s, var_p = variable.orphans
+    return pybamm.Concatenation(var_s, var_p)
+
+
 class Full(BaseModel):
     """Class for conservation of mass of oxygen. (Full refers to unreduced by
     asymptotic methods)
@@ -18,7 +35,8 @@ class Full(BaseModel):
     ----------
     param : parameter class
         The parameters to use for this submodel
-
+    reactions : dict
+        Dictionary of reaction terms
 
     **Extends:** :class:`pybamm.oxygen_diffusion.BaseModel`
     """
@@ -39,21 +57,17 @@ class Full(BaseModel):
             domain="positive electrode",
             auxiliary_domains={"secondary": "current collector"},
         )
-        c_ox_s_p = pybamm.concatenation(c_ox_s, c_ox_p)
+        c_ox_s_p = pybamm.Concatenation(c_ox_s, c_ox_p)
         variables = {"Separator and positive electrode oxygen concentration": c_ox_s_p}
 
-        variables.update(
-            self._get_standard_concentration_variables(c_ox_n, c_ox_s, c_ox_p)
-        )
+        c_ox = pybamm.Concatenation(c_ox_n, c_ox_s, c_ox_p)
+        variables.update(self._get_standard_concentration_variables(c_ox))
 
         return variables
 
     def get_coupled_variables(self, variables):
 
-        tor_s = variables["Separator tortuosity"]
-        tor_p = variables["Positive electrode tortuosity"]
-        tor = pybamm.concatenation(tor_s, tor_p)
-
+        tor = separator_and_positive_only(variables["Electrolyte tortuosity"])
         c_ox = variables["Separator and positive electrode oxygen concentration"]
         # TODO: allow charge and convection?
         v_box = pybamm.Scalar(0)
@@ -64,7 +78,7 @@ class Full(BaseModel):
 
         N_ox = N_ox_diffusion + param.C_e * c_ox * v_box
         # Flux in the negative electrode is zero
-        N_ox = pybamm.concatenation(
+        N_ox = pybamm.Concatenation(
             pybamm.FullBroadcast(0, "negative electrode", "current collector"), N_ox
         )
 
@@ -76,19 +90,13 @@ class Full(BaseModel):
 
         param = self.param
 
-        eps_s = variables["Separator porosity"]
-        eps_p = variables["Positive electrode porosity"]
-        eps = pybamm.concatenation(eps_s, eps_p)
-
-        deps_dt_s = variables["Separator porosity change"]
-        deps_dt_p = variables["Positive electrode porosity change"]
-        deps_dt = pybamm.concatenation(deps_dt_s, deps_dt_p)
-
+        eps = separator_and_positive_only(variables["Porosity"])
+        deps_dt = separator_and_positive_only(variables["Porosity change"])
         c_ox = variables["Separator and positive electrode oxygen concentration"]
         N_ox = variables["Oxygen flux"].orphans[1]
 
         j_ox = variables["Positive electrode oxygen interfacial current density"]
-        source_terms = pybamm.concatenation(
+        source_terms = pybamm.Concatenation(
             pybamm.FullBroadcast(0, "separator", "current collector"),
             param.s_ox_Ox * j_ox,
         )

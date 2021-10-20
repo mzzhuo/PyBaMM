@@ -13,31 +13,18 @@ class SolventDiffusionLimited(BaseModel):
     ----------
     param : parameter class
         The parameters to use for this submodel
-    reaction_loc : str
-        Where the reaction happens: "x-average" (SPM, SPMe, etc),
-        "full electrode" (full DFN), or "interface" (half-cell DFN)
-    options : dict, optional
-        A dictionary of options to be passed to the model.
+    domain : str
+        The domain of the model either 'Negative' or 'Positive'
 
     **Extends:** :class:`pybamm.sei.BaseModel`
     """
 
-    def __init__(self, param, reaction_loc, options=None):
-        super().__init__(param, options=options)
-        self.reaction_loc = reaction_loc
+    def __init__(self, param, domain):
+        super().__init__(param, domain)
 
     def get_fundamental_variables(self):
-        if self.reaction_loc == "x-average":
-            L_inner_av = pybamm.standard_variables.L_inner_av
-            L_outer_av = pybamm.standard_variables.L_outer_av
-            L_inner = pybamm.PrimaryBroadcast(L_inner_av, "negative electrode")
-            L_outer = pybamm.PrimaryBroadcast(L_outer_av, "negative electrode")
-        elif self.reaction_loc == "full electrode":
-            L_inner = pybamm.standard_variables.L_inner
-            L_outer = pybamm.standard_variables.L_outer
-        elif self.reaction_loc == "interface":
-            L_inner = pybamm.standard_variables.L_inner_interface
-            L_outer = pybamm.standard_variables.L_outer_interface
+        L_inner = pybamm.standard_variables.L_inner
+        L_outer = pybamm.standard_variables.L_outer
 
         variables = self._get_standard_thickness_variables(L_inner, L_outer)
         variables.update(self._get_standard_concentration_variables(variables))
@@ -45,9 +32,12 @@ class SolventDiffusionLimited(BaseModel):
         return variables
 
     def get_coupled_variables(self, variables):
-        L_sei_outer = variables["Outer SEI thickness"]
+        L_sei_outer = variables[
+            "Outer " + self.domain.lower() + " electrode SEI thickness"
+        ]
 
-        C_sei = self.param.C_sei_solvent
+        if self.domain == "Negative":
+            C_sei = self.param.C_sei_solvent_n
 
         j_sei = -1 / (C_sei * L_sei_outer)
 
@@ -58,24 +48,28 @@ class SolventDiffusionLimited(BaseModel):
         variables.update(self._get_standard_reaction_variables(j_inner, j_outer))
 
         # Update whole cell variables, which also updates the "sum of" variables
-        variables.update(super().get_coupled_variables(variables))
+        if (
+            "Negative electrode SEI interfacial current density" in variables
+            and "Positive electrode SEI interfacial current density" in variables
+            and "SEI interfacial current density" not in variables
+        ):
+            variables.update(
+                self._get_standard_whole_cell_interfacial_current_variables(variables)
+            )
 
         return variables
 
     def set_rhs(self, variables):
-        if self.reaction_loc == "x-average":
-            L_inner = variables["X-averaged inner SEI thickness"]
-            L_outer = variables["X-averaged outer SEI thickness"]
-            j_inner = variables["X-averaged inner SEI interfacial current density"]
-            j_outer = variables["X-averaged outer SEI interfacial current density"]
-        else:
-            L_inner = variables["Inner SEI thickness"]
-            L_outer = variables["Outer SEI thickness"]
-            j_inner = variables["Inner SEI interfacial current density"]
-            j_outer = variables["Outer SEI interfacial current density"]
+        domain = self.domain.lower() + " electrode"
+        L_inner = variables["Inner " + domain + " SEI thickness"]
+        L_outer = variables["Outer " + domain + " SEI thickness"]
+        j_inner = variables["Inner " + domain + " SEI interfacial current density"]
+        j_outer = variables["Outer " + domain + " SEI interfacial current density"]
+
         v_bar = self.param.v_bar
 
-        Gamma_SEI = self.param.Gamma_SEI
+        if self.domain == "Negative":
+            Gamma_SEI = self.param.Gamma_SEI_n
 
         self.rhs = {
             L_inner: -Gamma_SEI * j_inner,
@@ -83,12 +77,10 @@ class SolventDiffusionLimited(BaseModel):
         }
 
     def set_initial_conditions(self, variables):
-        if self.reaction_loc == "x-average":
-            L_inner = variables["X-averaged inner SEI thickness"]
-            L_outer = variables["X-averaged outer SEI thickness"]
-        else:
-            L_inner = variables["Inner SEI thickness"]
-            L_outer = variables["Outer SEI thickness"]
+        domain = self.domain.lower() + " electrode"
+        L_inner = variables["Inner " + domain + " SEI thickness"]
+        L_outer = variables["Outer " + domain + " SEI thickness"]
+
         L_inner_0 = self.param.L_inner_0
         L_outer_0 = self.param.L_outer_0
 

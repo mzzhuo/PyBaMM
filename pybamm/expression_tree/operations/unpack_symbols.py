@@ -66,15 +66,18 @@ class SymbolUnpacker(object):
 
     def _unpack(self, symbol):
         """ See :meth:`SymbolUnpacker.unpack()`. """
-        # found a symbol of the right class -> return it
-        if isinstance(symbol, self.classes_to_find):
-            return {symbol.id: symbol}
 
         children = symbol.children
 
+        # If symbol has no children, just check its class
         if len(children) == 0:
-            # not the right class and no children so the class to find doesn't appear
-            return {}
+            # found a symbol of the right class -> return it
+            if isinstance(symbol, self.classes_to_find):
+                return {symbol.id: symbol}
+            # otherwise return empty dictionary
+            else:
+                return {}
+
         else:
             # iterate over all children
             found_vars = {}

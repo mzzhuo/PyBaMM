@@ -5,7 +5,7 @@ import pybamm
 from .quick_plot import ax_min, ax_max
 
 
-def plot2D(x, y, z, ax=None, testing=False, **kwargs):
+def plot2D(x, y, z, xlabel=None, ylabel=None, title=None, testing=False, **kwargs):
     """
     Generate a simple 2D plot. Calls `matplotlib.pyplot.contourf` with keyword
     arguments 'kwargs'.  For a list of 'kwargs' see the
@@ -19,8 +19,12 @@ def plot2D(x, y, z, ax=None, testing=False, **kwargs):
         The array to plot on the y axis. Can be of shape (M, N)  or (M, 1)
     z : :class:`pybamm.Array`
         The array to plot on the z axis. Is of shape (M, N)
-    ax : matplotlib Axis, optional
-        The axis on which to put the plot. If None, a new figure and axis is created.
+    xlabel : str, optional
+        The label for the x axis
+    ylabel : str, optional
+        The label for the y axis
+    title : str, optional
+        The title for the plot
     testing : bool, optional
         Whether to actually make the plot (turned off for unit tests)
 
@@ -34,11 +38,6 @@ def plot2D(x, y, z, ax=None, testing=False, **kwargs):
     if not isinstance(z, pybamm.Array):
         raise TypeError("z must be 'pybamm.Array'")
 
-    if ax is not None:
-        testing = True
-    else:
-        _, ax = plt.subplots()
-
     # Get correct entries of x and y depending on shape
     if x.shape == y.shape == z.shape:
         x_entries = x.entries
@@ -47,7 +46,7 @@ def plot2D(x, y, z, ax=None, testing=False, **kwargs):
         x_entries = x.entries[:, 0]
         y_entries = y.entries[:, 0]
 
-    plot = ax.contourf(
+    plt.contourf(
         x_entries,
         y_entries,
         z.entries,
@@ -55,9 +54,12 @@ def plot2D(x, y, z, ax=None, testing=False, **kwargs):
         vmax=ax_max(z.entries),
         **kwargs
     )
-    plt.colorbar(plot, ax=ax)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.colorbar()
 
     if not testing:  # pragma: no cover
         plt.show()
 
-    return ax
+    return

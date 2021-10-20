@@ -54,9 +54,7 @@ class Full(BaseModel):
         pybamm.citations.register("Sulzer2019physical")
 
     def set_porosity_submodel(self):
-        self.submodels["porosity"] = pybamm.porosity.ReactionDrivenODE(
-            self.param, self.options, False
-        )
+        self.submodels["porosity"] = pybamm.porosity.Full(self.param)
 
     def set_convection_submodel(self):
         if self.options["convection"] == "none":
@@ -122,7 +120,7 @@ class Full(BaseModel):
                 ] = surf_form.FullAlgebraic(self.param, domain)
 
     def set_side_reaction_submodels(self):
-        if self.options["hydrolysis"] == "true":
+        if "oxygen" in self.options["side reactions"]:
             self.submodels["oxygen diffusion"] = pybamm.oxygen_diffusion.Full(
                 self.param
             )

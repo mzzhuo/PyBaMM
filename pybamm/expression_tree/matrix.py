@@ -1,17 +1,16 @@
 #
 # Matrix class
 #
-import numpy as np
-from scipy.sparse import csr_matrix, issparse
-
 import pybamm
+import numpy as np
+from scipy.sparse import issparse
 
 
 class Matrix(pybamm.Array):
-    """
-    Node in the expression tree that holds a matrix type (e.g. :class:`numpy.array`)
+    """node in the expression tree that holds a matrix type (e.g. :class:`numpy.array`)
 
     **Extends:** :class:`Array`
+
     """
 
     def __init__(
@@ -28,7 +27,4 @@ class Matrix(pybamm.Array):
             name = "Matrix {!s}".format(entries.shape)
             if issparse(entries):
                 name = "Sparse " + name
-        # Convert all sparse matrices to csr
-        if issparse(entries) and not isinstance(entries, csr_matrix):
-            entries = csr_matrix(entries)
         super().__init__(entries, name, domain, auxiliary_domains, entries_string)

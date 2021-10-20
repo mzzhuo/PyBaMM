@@ -44,7 +44,7 @@ class NewmanTobias(DFN):
     def __init__(self, options=None, name="Newman-Tobias model", build=True):
 
         # Set default option "uniform profile" for particle submodel. Other
-        # default options are those given in `pybamm.BatteryModelOptions` defined in
+        # default options are those given in `pybamm.Options` defined in
         # `base_battery_model.py`.
         options = options or {}
         if "particle" not in options:
@@ -58,14 +58,12 @@ class NewmanTobias(DFN):
     def set_particle_submodel(self):
 
         if self.options["particle"] == "Fickian diffusion":
-            submod_n = pybamm.particle.no_distribution.XAveragedFickianDiffusion(
+            self.submodels["negative particle"] = pybamm.particle.FickianSingleParticle(
                 self.param, "Negative"
             )
-            self.submodels["negative particle"] = submod_n
-            submod_p = pybamm.particle.no_distribution.XAveragedFickianDiffusion(
+            self.submodels["positive particle"] = pybamm.particle.FickianSingleParticle(
                 self.param, "Positive"
             )
-            self.submodels["positive particle"] = submod_p
         elif self.options["particle"] in [
             "uniform profile",
             "quadratic profile",
@@ -73,12 +71,12 @@ class NewmanTobias(DFN):
         ]:
             self.submodels[
                 "negative particle"
-            ] = pybamm.particle.no_distribution.XAveragedPolynomialProfile(
+            ] = pybamm.particle.PolynomialSingleParticle(
                 self.param, "Negative", self.options["particle"]
             )
             self.submodels[
                 "positive particle"
-            ] = pybamm.particle.no_distribution.XAveragedPolynomialProfile(
+            ] = pybamm.particle.PolynomialSingleParticle(
                 self.param, "Positive", self.options["particle"]
             )
 
