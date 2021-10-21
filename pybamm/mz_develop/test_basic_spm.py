@@ -92,13 +92,16 @@ from scipy.sparse import csr_matrix, issparse
 
 eqn = model.tesym
 
+#%%
+
+zzz = disc.process_symbol(eqn)
+
+#%%
 left, right = eqn.children
 
 disc_left = disc.process_symbol(left)
 disc_right = disc.process_symbol(right)
-#%%
-eqn = model.rhs[list(model.rhs.keys())[2]]
-zzz = disc.process_symbol(eqn)
+
 
 
 #%%

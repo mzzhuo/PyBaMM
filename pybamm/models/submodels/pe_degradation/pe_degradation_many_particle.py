@@ -160,8 +160,8 @@ class PeDegradationManyParticle(BasePeDegradation):
         D_c = self.D_c(c_c, T_c)
         D_o = self.D_o(c_o, T_o)
 
-        eta = pybamm.phase_transition.eta
-        psi = pybamm.phase_transition.psi
+        eta = pybamm.pe_degradation.eta
+        psi = pybamm.pe_degradation.psi
 
         s_dot = variables["Time derivative of moving phase boundary location"]
 

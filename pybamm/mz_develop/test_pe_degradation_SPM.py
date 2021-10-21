@@ -14,8 +14,8 @@ geometry = model.default_geometry
 
 param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
 # param = model.default_parameter_values
-# param["Current function [A]"] = -1.675
-param["Current function [A]"] = 0
+param["Current function [A]"] = -1.675
+# param["Current function [A]"] = 0
 #
 param.process_model(model)
 #

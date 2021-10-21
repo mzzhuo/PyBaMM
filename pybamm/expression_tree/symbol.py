@@ -32,9 +32,9 @@ def domain_size(domain):
         "positive electrode": 17,
         "working electrode": 19,
         "working particle": 23,
+        "negative particle size": 29,
+        "positive particle size": 31,
     }
-    if isinstance(domain, str):
-        domain = [domain]
     if domain in [[], None]:
         size = 1
     elif all(dom in fixed_domain_sizes for dom in domain):
@@ -112,9 +112,16 @@ def is_matrix_x(expr, x):
 
     if is_constant(expr):
         result = expr.evaluate_ignoring_errors(t=None)
-        return (issparse(result) and np.all(result.__dict__["data"] == x)) or (
-            isinstance(result, np.ndarray) and np.all(result == x)
-        )
+        return (
+            issparse(result)
+            and (
+                (x == 0 and np.prod(len(result.__dict__["data"])) == 0)
+                or (
+                    len(result.__dict__["data"]) == np.prod(result.shape)
+                    and np.all(result.__dict__["data"] == x)
+                )
+            )
+        ) or (isinstance(result, np.ndarray) and np.all(result == x))
     else:
         return False
 
@@ -441,8 +448,6 @@ class Symbol(anytree.NodeMixin):
             name = "&#43;"
         elif name == "**":
             name = "^"
-        elif name == "epsilon_s":
-            name = "&#603;"
 
         new_node = anytree.Node(str(counter), label=name)
         counter += 1

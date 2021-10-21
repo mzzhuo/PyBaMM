@@ -111,7 +111,9 @@ class SPM(BaseModel):
             if particle_side == "Fickian diffusion":
                 self.submodels[
                     domain.lower() + " particle"
-                ] = pybamm.particle.FickianSingleParticle(self.param, domain)
+                ] = pybamm.particle.no_distribution.XAveragedFickianDiffusion(
+                    self.param, domain
+                )
             elif particle_side in [
                 "uniform profile",
                 "quadratic profile",
@@ -119,7 +121,7 @@ class SPM(BaseModel):
             ]:
                 self.submodels[
                     domain.lower() + " particle"
-                ] = pybamm.particle.PolynomialSingleParticle(
+                ] = pybamm.particle.no_distribution.XAveragedPolynomialProfile(
                     self.param, domain, particle_side
                 )
 

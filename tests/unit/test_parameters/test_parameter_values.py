@@ -4,6 +4,7 @@
 
 import os
 import tempfile
+import subprocess
 import unittest
 
 import numpy as np
@@ -71,6 +72,18 @@ class TestParameterValues(unittest.TestCase):
         with self.assertRaisesRegex(KeyError, "must provide 'cell' parameters"):
             pybamm.ParameterValues(chemistry={"chemistry": "lithium_ion"})
 
+    def test_update_from_chemistry_local(self):
+        # Copy parameters
+        cmd = ["pybamm_edit_parameter", "-f", "lithium_ion"]
+        subprocess.run(cmd)
+
+        # Import parameters from chemistry
+        pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Chen2020)
+
+        # Clean up parameter files
+        cmd = ["rm", "-r", "lithium_ion"]
+        subprocess.run(cmd)
+
     def test_update(self):
         # converts to dict if not
         param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Chen2020)
@@ -123,6 +136,10 @@ class TestParameterValues(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "surface area to volume ratio"):
             pybamm.ParameterValues(
                 {"Negative electrode surface area to volume ratio distribution in x": 1}
+            )
+        with self.assertRaisesRegex(ValueError, "propotional term"):
+            pybamm.ParameterValues(
+                {"Negative electrode LAM constant propotional term": 1}
             )
 
     def test_process_symbol(self):
@@ -572,7 +589,7 @@ class TestParameterValues(unittest.TestCase):
             auxiliary_domains={
                 "secondary": "test sec",
                 "tertiary": "test tert",
-                "quaternary": "test quat"
+                "quaternary": "test quat",
             },
         )
         func = pybamm.x_average(pybamm.FunctionParameter("func", {"var": var}))
@@ -585,7 +602,7 @@ class TestParameterValues(unittest.TestCase):
             pybamm.FullBroadcast(
                 pybamm.Scalar(2, name="func"),
                 "test sec",
-                {"secondary": "test tert", "tertiary": "test quat"}
+                {"secondary": "test tert", "tertiary": "test quat"},
             ).id,
         )
 
