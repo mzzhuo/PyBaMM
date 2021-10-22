@@ -14,8 +14,8 @@ eta = pybamm.SpatialVariable(
         "secondary": "positive electrode",
         "tertiary": "current collector",
     },
-    # coord_sys="spherical polar"
-    coord_sys="cartesian"
+    coord_sys="spherical polar"
+    # coord_sys="cartesian"
 )
 psi = pybamm.SpatialVariable(
     "psi", 
@@ -33,8 +33,8 @@ eta_xav = pybamm.SpatialVariable(
     auxiliary_domains={
         "secondary": "current collector",
     },
-    # coord_sys="spherical polar"
-    coord_sys="cartesian"
+    coord_sys="spherical polar"
+    # coord_sys="cartesian"
 )
 psi_xav = pybamm.SpatialVariable(
     "psi", 

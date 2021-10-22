@@ -178,13 +178,13 @@ class PeDegradationSingleParticle(BasePeDegradation):
         #     * pybamm.div(eta ** 2 * D_c * pybamm.grad(c_c_xav))
         # )
         # spherical polar
-        # self.rhs[c_c_xav] = (
-        #     pybamm.inner(eta * s_dot / s_xav, pybamm.grad(c_c_xav)) 
-        #     + 1 / self.C_c / (s_xav ** 2) 
-        #     * pybamm.div(D_c * pybamm.grad(c_c_xav))
-        # )
+        self.rhs[c_c_xav] = (
+            pybamm.inner(eta * s_dot / s_xav, pybamm.grad(c_c_xav)) 
+            + 1 / self.C_c / (s_xav ** 2) 
+            * pybamm.div(D_c * pybamm.grad(c_c_xav))
+        )
         # test 
-        self.rhs[c_c_xav] = pybamm.div(eta * pybamm.grad(c_c_xav))
+        # self.rhs[c_c_xav] = pybamm.div(pybamm.grad(c_c_xav))
 
         self.rhs[c_o_xav] = (
             pybamm.inner((1 - psi) * s_dot / (1 - s_xav), pybamm.grad(c_o_xav))

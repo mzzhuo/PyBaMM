@@ -145,15 +145,45 @@ R_p_edge = pybamm.SpatialVariableEdge(
 # and default_var_pts
 # so that it's general for both SPM and DFN
 # see base_phase_transition.py for more precise/correct definitions
+# eta = pybamm.SpatialVariable(
+#     "eta", 
+#     domain=["positive core"]
+# )
+# chi = pybamm.SpatialVariable(
+#     "chi", 
+#     domain=["positive shell"]
+# )
+# psi = pybamm.SpatialVariable(
+#     "psi", 
+#     domain=["positive shell oxygen"]
+# )
+
+
 eta = pybamm.SpatialVariable(
     "eta", 
-    domain=["positive core"]
+    domain=["positive core"],
+    auxiliary_domains={
+        "secondary": "positive electrode",
+        "tertiary": "current collector",
+    },
+    coord_sys="spherical polar"
+    # coord_sys="cartesian"
 )
 chi = pybamm.SpatialVariable(
     "chi", 
-    domain=["positive shell"]
+    domain=["positive shell"],
+    auxiliary_domains={
+        "secondary": "positive electrode",
+        "tertiary": "current collector",
+    },
+    coord_sys="cartesian"
 )
 psi = pybamm.SpatialVariable(
     "psi", 
-    domain=["positive shell oxygen"]
+    domain=["positive shell oxygen"],
+    auxiliary_domains={
+        "secondary": "positive electrode",
+        "tertiary": "current collector",
+    },
+    coord_sys="cartesian"
 )

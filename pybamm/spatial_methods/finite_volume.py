@@ -1161,10 +1161,10 @@ class FiniteVolume(pybamm.SpatialMethod):
             disc_left = self.node_to_edge(disc_left, method=method)
         # Return new binary operator with appropriate class
         out = pybamm.simplify_if_constant(
-            # bin_op._binary_new_copy(disc_left, disc_right)
+            bin_op._binary_new_copy(disc_left, disc_right)
             # change back to previous version, otherwise 
             # Newmannu bc incorrectly mapped
-            bin_op.__class__(disc_left, disc_right)
+            # bin_op.__class__(disc_left, disc_right)
         )
 
         return out
