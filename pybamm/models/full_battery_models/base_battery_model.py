@@ -175,7 +175,7 @@ class BatteryModelOptions(pybamm.FuzzyDict):
             "particle mechanics": ["none", "swelling only", "swelling and cracking"],
             "particle shape": ["spherical", "user", "no particles"],
             "particle size": ["single", "distribution"],
-            "PE phase transition": ["none", "yes", "on"],
+            "PE degradation": ["none", "yes", "on"],
             "SEI": [
                 "none",
                 "constant",
@@ -210,7 +210,7 @@ class BatteryModelOptions(pybamm.FuzzyDict):
             "particle shape": "spherical",
             "particle size": "single",
             "SEI": "none",
-            "PE phase transition": "none",
+            "PE degradation": "none",
             "SEI porosity change": "false",
             "surface form": "false",
             "thermal": "isothermal",
@@ -407,7 +407,7 @@ class BaseBatteryModel(pybamm.BaseModel):
         # Default parameter values
         # Lion parameters left as default parameter set for tests
         base_chemistry = pybamm.parameter_sets.Marquis2019
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             base_chemistry = pybamm.parameter_sets.Zhuo2021
         return pybamm.ParameterValues(chemistry=base_chemistry)
 
@@ -417,7 +417,7 @@ class BaseBatteryModel(pybamm.BaseModel):
             options=self.options,
             current_collector_dimension=self.options["dimensionality"],
         )
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             var = pybamm.standard_spatial_vars
             base_geometry.update(
                 {
@@ -451,7 +451,7 @@ class BaseBatteryModel(pybamm.BaseModel):
         # Reduce the default points for 2D current collectors
         if self.options["dimensionality"] == 2:
             base_var_pts.update({var.x_n: 10, var.x_s: 10, var.x_p: 10})
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             base_var_pts.update({var.eta: 30, var.chi: 20, var.psi: 30})
         return base_var_pts
 
@@ -476,7 +476,7 @@ class BaseBatteryModel(pybamm.BaseModel):
             base_submeshes["current collector"] = pybamm.MeshGenerator(
                 pybamm.ScikitUniform2DSubMesh
             )
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             base_submeshes.update(
                 {
                     "positive core": pybamm.MeshGenerator(pybamm.Uniform1DSubMesh),
@@ -504,7 +504,7 @@ class BaseBatteryModel(pybamm.BaseModel):
             base_spatial_methods["current collector"] = pybamm.FiniteVolume()
         elif self.options["dimensionality"] == 2:
             base_spatial_methods["current collector"] = pybamm.ScikitFiniteElement()
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             base_spatial_methods.update(
                 {
                     "positive core": pybamm.FiniteVolume(),

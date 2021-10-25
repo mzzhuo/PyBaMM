@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #%%
-model = pybamm.lithium_ion.DFN({"PE phase transition": "yes"})
+model = pybamm.lithium_ion.DFN({"PE degradation": "yes"})
 geometry = model.default_geometry
 
 # param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Chen2020)
@@ -121,7 +121,7 @@ plot.dynamic_plot()
 
 
 # %%
-model = pybamm.lithium_ion.DFN({"PE phase transition": "yes"})
+model = pybamm.lithium_ion.DFN({"PE degradation": "yes"})
 
 #%
 param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)

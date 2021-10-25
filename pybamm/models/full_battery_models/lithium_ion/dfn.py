@@ -50,7 +50,7 @@ class DFN(BaseModel):
         self.set_current_collector_submodel()
         self.set_sei_submodel()
         self.set_lithium_plating_submodel()
-        self.set_phase_transition_submodel()
+        self.set_pe_degradation_submodel()
 
         # For half-cell models, remove negative electrode submodels
         # that are not needed before building
@@ -155,18 +155,13 @@ class DFN(BaseModel):
                         self.param, domain
                     )
 
-    def set_phase_transition_submodel(self):
+    def set_pe_degradation_submodel(self):
 
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             # replace the fickian particle submodel for PE 
-            # make sure set_phase_transition_submodel comes after
+            # make sure set_pe_degradation_submodel comes after
             # set_particle_submodel
             if "positive particle" in self.submodels:
-                # self.submodels[
-                #     "positive particle"
-                # ] = pybamm.phase_transition.PhaseTransitionManyParticle(
-                #     self.param, "Positive"
-                # )
                 self.submodels[
                     "positive particle"
                 ] = pybamm.pe_degradation.PeDegradationManyParticle(

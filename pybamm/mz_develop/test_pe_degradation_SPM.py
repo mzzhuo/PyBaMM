@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 #%%
 # ---------------------------------------------------------
 #
-model = pybamm.lithium_ion.SPM({"PE phase transition": "yes"})
+model = pybamm.lithium_ion.SPM({"PE degradation": "yes"})
 
 geometry = model.default_geometry
 
@@ -104,7 +104,7 @@ plot.dynamic_plot()
 
 
 #%%
-model = pybamm.lithium_ion.SPM({"PE phase transition": "yes"})
+model = pybamm.lithium_ion.SPM({"PE degradation": "yes"})
 param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
 #%%
 experiment = pybamm.Experiment(

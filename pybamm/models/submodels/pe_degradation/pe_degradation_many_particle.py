@@ -224,8 +224,8 @@ class PeDegradationManyParticle(BasePeDegradation):
         # x_p_s = pybamm.PrimaryBroadcast(x_p, "positive shell")
         # x_p_o = pybamm.PrimaryBroadcast(x_p, "positive shell oxygen")
 
-        eta = pybamm.phase_transition.eta
-        psi = pybamm.phase_transition.psi
+        eta = pybamm.pe_degradation.eta
+        psi = pybamm.pe_degradation.psi
 
         self.initial_conditions[c_c] = self.c_c_init(eta)
         self.initial_conditions[c_o] = self.c_o_init(psi)

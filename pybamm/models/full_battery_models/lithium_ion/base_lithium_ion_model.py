@@ -44,7 +44,7 @@ class BaseModel(pybamm.BaseBatteryModel):
             )
 
         # update length_scales
-        if self.options["PE phase transition"] in ["yes", "on"]:
+        if self.options["PE degradation"] in ["yes", "on"]:
             self.length_scales.update(
                 {
                     "positive core": self.param.R_p_typ,

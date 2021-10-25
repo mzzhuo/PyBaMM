@@ -146,7 +146,6 @@ from .models.submodels import (
     interface,
     oxygen_diffusion,
     particle,
-    phase_transition,
     pe_degradation,
     porosity,
     thermal,

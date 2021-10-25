@@ -237,8 +237,8 @@ class PeDegradationSingleParticle(BasePeDegradation):
         c_o_xav = variables["X-averaged positive shell concentration of oxygen"]
         s_xav = variables["X-averaged moving phase boundary location"]
 
-        eta = pybamm.phase_transition.eta_xav
-        psi = pybamm.phase_transition.psi_xav
+        eta = pybamm.pe_degradation.eta_xav
+        psi = pybamm.pe_degradation.psi_xav
 
         self.initial_conditions[c_c_xav] = self.c_c_init(eta)
         self.initial_conditions[c_o_xav] = self.c_o_init(psi)
