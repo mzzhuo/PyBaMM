@@ -107,6 +107,20 @@ class BaseKinetics(BaseInterface):
                 eta_sei = pybamm.Scalar(0)
             eta_r += eta_sei
 
+        # Add shell resistance in the positive electrode 
+        if self.domain == "Positive":
+            if self.options["PE degradation"] in ["yes", "on"]:
+                R_shell = self.param.R_shell
+                s = variables["Moving phase boundary location"]
+                R = variables["Positive particle radius"]
+                j_tot = variables[
+                    "Total positive electrode interfacial current density variable"
+                ]
+                eta_shell = -j_tot * (pybamm.Scalar(1) - s) * R * R_shell
+            else:
+                eta_shell = pybamm.Scalar(0)
+            eta_r += eta_shell
+
         # Get number of electrons in reaction
         ne = self._get_number_of_electrons_in_reaction()
         # Get kinetics. Note: T must have the same domain as j0 and eta_r
@@ -160,6 +174,11 @@ class BaseKinetics(BaseInterface):
         ]:
             variables.update(
                 self._get_standard_sei_film_overpotential_variables(eta_sei)
+            )
+
+        if self.domain == "Positive" and self.reaction == "lithium-ion main":
+            variables.update(
+                self._get_standard_pe_shell_overpotential_variables(eta_shell)
             )
 
         if (

@@ -657,6 +657,28 @@ class BaseInterface(pybamm.BaseSubModel):
 
         return variables
 
+    def _get_standard_pe_shell_overpotential_variables(self, eta_shell):
+
+        pot_scale = self.param.potential_scale
+
+        # Average, and broadcast if necessary
+        eta_shell_av = pybamm.x_average(eta_shell)
+        if eta_shell.domain == []:
+            eta_shell = pybamm.FullBroadcast(
+                eta_shell, self.domain_for_broadcast, "current collector"
+            )
+        elif eta_shell.domain == ["current collector"]:
+            eta_shell = pybamm.PrimaryBroadcast(eta_shell, self.domain_for_broadcast)
+
+        variables = {
+            "PE shell layer overpotential": eta_shell,
+            "X-averaged PE shell layer overpotential": eta_shell_av,
+            "PE shell layer overpotential [V]": eta_shell * pot_scale,
+            "X-averaged PE shell layer overpotential [V]": eta_shell_av * pot_scale,
+        }
+
+        return variables
+
     def _get_standard_surface_potential_difference_variables(self, delta_phi):
 
         if self.domain == "Negative":

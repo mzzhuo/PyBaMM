@@ -74,8 +74,22 @@ class InverseButlerVolmer(BaseInterface):
         else:
             eta_sei = pybamm.Scalar(0)
 
-        delta_phi = eta_r + ocp - eta_sei  # = phi_s - phi_e
+        # With phase-transformed shell layer in positive electrode particle
+        if self.domain == "Positive":
+            if self.options["PE degradation"] in ["yes", "on"]:
+                R_shell = self.param.R_shell
+                s = variables["Moving phase boundary location"]
+                eta_shell = -j_tot * (pybamm.Scalar(1) - s) * R_shell
+                variables.update(
+                    self._get_standard_pe_shell_overpotential_variables(eta_shell)
+                )
+            else:
+                eta_shell = pybamm.Scalar(0)
+        else:
+            eta_shell = pybamm.Scalar(0)
 
+        delta_phi = eta_r + ocp - eta_sei - eta_shell # = phi_s - phi_e
+ 
         variables.update(self._get_standard_exchange_current_variables(j0))
         variables.update(self._get_standard_overpotential_variables(eta_r))
         variables.update(
