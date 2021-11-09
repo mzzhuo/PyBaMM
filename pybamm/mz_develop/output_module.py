@@ -78,7 +78,7 @@ output_variables_dfn.extend(
         "Shared concentration at core-shell interface [mol.m-3]",     
         # "X-averaged shared concentration at core-shell interface [mol.m-3]",
         #---------------------------------------------------------
-        # "Current [A]",
+        "Current [A]",
         "Terminal voltage [V]",
         # "X-averaged positive electrode temperature [K]",
         # "Time derivative of moving phase boundary location",
@@ -92,7 +92,7 @@ output_variables_dfn.extend(
         ],
         "LLI [%]",
         "X-averaged PE shell layer overpotential [V]",
-        "PE shell layer overpotential [V]",
+        # "PE shell layer overpotential [V]",
         "Positive electrode interfacial current density [A.m-2]",
         # "Electrolyte concentration [mol.m-3]",
         # "Negative electrode potential [V]",

@@ -32,7 +32,7 @@ Minimum concentration in core when fully charged [mol.m-3],10953.48,,0.222 * c_m
 Initial oxygen concentration in positive shell [mol.m-3],[function]initial_oxygen_concentration,,
 ,,,
 # Initial phase boundary location [m],3.8E-6,,R_p
-Initial phase boundary location [m],3.70E-6,,
+Initial phase boundary location [m],3.75E-6,,
 # Initial phase boundary location [m],2.66E-6,,0.7 * R_p
 # Initial phase boundary location [m],1.9E-6,,0.5 * R_p
 Constant oxygen concentration in particle core [mol.m-3],152193.21,,  
