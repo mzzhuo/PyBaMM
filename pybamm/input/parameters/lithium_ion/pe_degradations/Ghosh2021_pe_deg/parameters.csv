@@ -17,13 +17,12 @@ Reverse chemical reaction coefficient [m4.mol-1.s-1],1.732E-16,,
 # Initial conditions
 Initial concentration in positive core [mol.m-3],46478.28,,0.942 * c_max_p
 # Initial concentration in positive core [mol.m-3],13000,,
-# Initial concentration in positive shell [mol.m-3],46478.28,,0.942 * c_max_p
 ,,,
 # Initial concentration in positive electrode [mol.m-3],1.889167108179036e+03,,
 Initial concentration in positive electrode [mol.m-3],3.279336810030618e+04,,
 ,,,
 # Trapped lithium concentration in shell [mol.m-3],10953.48,,0.222 * c_max_p
-Trapped lithium concentration in shell [mol.m-3],20000,,0.222 * c_max_p
+Trapped lithium concentration in shell [mol.m-3],20000,,
 Minimum concentration in core when fully charged [mol.m-3],10953.48,,0.222 * c_max_p
 # for discharge
 # Initial concentration in positive core [mol.m-3],10953.48,,0.222 * c_max_p
@@ -36,7 +35,9 @@ Initial oxygen concentration in positive shell [mol.m-3],[function]initial_oxyge
 Initial phase boundary location [m],3.70E-6,,
 # Initial phase boundary location [m],2.66E-6,,0.7 * R_p
 # Initial phase boundary location [m],1.9E-6,,0.5 * R_p
-# Ratio of maximum lithium concentration between core and shell,1,,
-# Ratio of maximum lithium concentration between core and shell,0.7,,
-Constant oxygen concentration in particle core [mol.m-3],152193.21,,
-Threshold concentration for phase transition [mol.m-3],14802,,0.3 * c_max_p
+Constant oxygen concentration in particle core [mol.m-3],152193.21,,  
+# Threshold concentration for phase transition [mol.m-3],14802,,0.3 * c_max_p
+Threshold concentration for phase transition [mol.m-3],900,,
+,,,
+# Shell resistance [ohm],0.072,,
+Positive electrode shell resistivity [Ohm.m],2e6, Safari 2009, 

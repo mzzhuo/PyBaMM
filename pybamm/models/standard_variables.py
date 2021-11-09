@@ -10,7 +10,7 @@ class StandardVariables:
         # Discharge capacity
         self.Q = pybamm.Variable("Discharge capacity [A.h]")
         # Total charge throughput 
-        # self.Q_tct = pybamm.Variable("Total charge throughput [A.h]")
+        # self.Q_thrpt = pybamm.Variable("Total charge throughput [A.h]")
 
 
         # Electrolyte concentration

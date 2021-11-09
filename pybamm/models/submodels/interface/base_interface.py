@@ -274,7 +274,7 @@ class BaseInterface(pybamm.BaseSubModel):
         if self.half_cell and self.domain == "Negative":
             # In a half-cell the total interfacial current density is the current
             # collector current density, not divided by electrode thickness
-            i_boundary_cc = variables["Current collector current density"]
+            # i_boundary_cc = variables["Current collector current density"]
             j_total_average = i_boundary_cc
         else:
             a_av = variables[

@@ -283,6 +283,20 @@ class BatteryModelOptions(pybamm.FuzzyDict):
                     "current density as a state' must be 'true'"
                 )
 
+        # If "PE degradation" is "yes" or "on" then "total interfacial current
+        # density as a state" must be "true"
+        if options["PE degradation"] in ["yes", "on"]:
+            options["total interfacial current density as a state"] = "true"
+            # Check that extra_options did not try to provide a clashing option
+            if (
+                extra_options.get("total interfacial current density as a state")
+                == "false"
+            ):
+                raise pybamm.OptionError(
+                    "If 'PE degradation' is 'yes' or 'on' then 'total interfacial "
+                    "current density as a state' must be 'true'"
+                )
+
         # Options not yet compatible with particle-size distributions
         if options["particle size"] == "distribution":
             if options["SEI"] != "none":

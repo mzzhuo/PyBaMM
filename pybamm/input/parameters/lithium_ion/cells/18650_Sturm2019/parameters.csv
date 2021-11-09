@@ -27,6 +27,7 @@ Electrode width [m],1.23,,needed for A_cc total lithium
 # Positive current collector thermal conductivity [W.m-1.K-1],237,CRC Handbook,aluminium
 ,,,
 # Electrical,,,
-Nominal cell capacity [A.h],3.35,,
+# PE 49340*0.72*0.745*4.7227e-6*96487/3600 NE 34257*0.85*0.694*6.1852e-6*96487/3600
+Nominal cell capacity [A.h],3.35,, 
 Typical current [A],3.35,Chen 2020,
 Current function [A],3.35,,default current function 1 C

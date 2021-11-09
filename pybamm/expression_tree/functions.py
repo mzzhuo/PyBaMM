@@ -400,7 +400,7 @@ class Absolute(SpecificFunction):
     """Absolute function."""
 
     def __init__(self, child):
-        super().__init__(np.absolute, child)
+        super().__init__(np.abs, child)
 
     def _function_diff(self, children, idx):
         """See :meth:`pybamm.Function._function_diff()`."""

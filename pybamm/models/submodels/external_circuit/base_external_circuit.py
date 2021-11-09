@@ -12,26 +12,26 @@ class BaseModel(pybamm.BaseSubModel):
 
     def get_fundamental_variables(self):
         Q = pybamm.standard_variables.Q
-        # Q_tct = pybamm.standard_variables.Q_tct
+        # Q_thrpt = pybamm.standard_variables.Q_thrpt
         variables = {
             "Discharge capacity [A.h]": Q,
-            # "Total charge throughput [A.h]": Q_tct
+            # "Total charge throughput [A.h]": Q_thrpt
         }
         return variables
 
     def set_initial_conditions(self, variables):
         Q = variables["Discharge capacity [A.h]"]
         self.initial_conditions[Q] = pybamm.Scalar(0)
-        # Q_tct = variables["Total charge throughput [A.h]"]
-        # self.initial_conditions[Q_tct] = pybamm.Scalar(0)
+        # Q_thrpt = variables["Total charge throughput [A.h]"]
+        # self.initial_conditions[Q_thrpt] = pybamm.Scalar(0)
 
     def set_rhs(self, variables):
         # ODE for discharge capacity
         Q = variables["Discharge capacity [A.h]"]
-        # Q_tct = variables["Total charge throughput [A.h]"]
+        # Q_thrpt = variables["Total charge throughput [A.h]"]
         I = variables["Current [A]"]
         self.rhs[Q] = I * self.param.timescale / 3600
-        # self.rhs[Q_tct] = pybamm.abs(I) * self.param.timescale / 3600
+        # self.rhs[Q_thrpt] = pybamm.abs(I) * self.param.timescale / 3600
 
 
 class LeadingOrderBaseModel(BaseModel):
