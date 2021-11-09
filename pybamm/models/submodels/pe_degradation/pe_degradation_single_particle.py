@@ -206,10 +206,6 @@ class PeDegradationSingleParticle(BasePeDegradation):
         dx_cp_av = variables["X-averaged positive core surface cell length"] 
         dx_co_av = variables["X-averaged positive shell center cell length of oxygen"]
 
-        # j_xav = variables[
-        #     "X-averaged positive electrode interfacial current density"
-        # ]
-
         c_share = variables["X-averaged shared concentration at core-shell interface"]
         c_o_b   = variables["X-averaged oxygen concentration at core-shell interface"]
 

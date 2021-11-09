@@ -2,14 +2,13 @@ import pybamm
 import numpy as np
 # import os
 import matplotlib.pyplot as plt
-
-
+import pybamm.mz_develop.output_module as outmod
 
 #%%
 # ---------------------------------------------------------
 #
 model = pybamm.lithium_ion.SPM({"PE degradation": "yes"})
-
+#%%
 geometry = model.default_geometry
 
 param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
@@ -44,54 +43,9 @@ t_eval = np.linspace(0, 7300, 100)
 
 solution = solver.solve(model_disc, t_eval)
 
-
-
-#%%
-output_variables = [
-    # "X-averaged negative particle concentration [mol.m-3]",
-    # "X-averaged positive particle concentration [mol.m-3]",
-    #---------------------------------------------------------
-    "X-averaged positive core concentration [mol.m-3]",
-    #---------------------------------------------------------
-    # "X-averaged positive shell concentration [mol.m-3]",
-    # #---------------------------------------------------------
-    # "X-averaged positive shell concentration of oxygen [mol.m-3]",
-    #---------------------------------------------------------
-    "X-averaged moving phase boundary location",
-    # #---------------------------------------------------------
-    "X-averaged shared concentration at core-shell interface [mol.m-3]",
-    #---------------------------------------------------------
-    "Current [A]",
-    "Terminal voltage [V]",
-    # "X-averaged positive electrode temperature [K]",
-    # "X-averaged time derivative of moving phase boundary location",
-    # "Loss of active material in positive electrode (MZ)",
-    "X-averaged loss of active material in positive electrode (MZ)",
-    # "X-averaged positive electrode interfacial current density [A.m-2]",
-    # "Loss of active material in positive electrode [%]",
-    # "X-averaged positive core surface concentration [mol.m-3]",
-    "Discharge capacity [A.h]",
-    # "Total charge throughput [A.h]"
-]
-#%
-output_variables.extend(
-    [
-        #---------------------------------------------------------
-        [
-            "Total lithium in positive electrode [mol]",
-            "Total lithium in negative electrode [mol]",
-            "Total lithium [mol]",
-        ],
-        "Loss of lithium inventory [%]",
-        # "Electrolyte concentration [mol.m-3]",
-        # "Negative electrode potential [V]",
-        # "Electrolyte potential [V]",
-        # "Positive electrode potential [V]",
-    ]
-)
-
 #%%
 # solution = sim.solution
+output_variables = outmod.output_variables_spm
 plot = pybamm.QuickPlot(
     solution,
     output_variables,
@@ -103,21 +57,33 @@ plot.dynamic_plot()
 
 
 
+
+
+
+
 #%%
-model = pybamm.lithium_ion.SPM({"PE degradation": "yes"})
+import pybamm
+import numpy as np
+# import os
+import matplotlib.pyplot as plt
+import pybamm.mz_develop.output_module as outmod
+
+#%%
+model = pybamm.lithium_ion.SPM({"PE degradation": "none"})
+#%
 param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
 #%%
 experiment = pybamm.Experiment(
     [
         (
-            "Charge at 1.0 C until 4.2 V",
+            "Charge at 0.5 C until 4.2 V",
             # "Hold at 4.2 V until C/50",
             # "Rest for 30 minutes",
-            "Discharge at 1.0 C until 2.8 V",
+            # "Discharge at 1.0 C until 2.8 V",
             # "Hold at 2.8 V until C/50",
             # "Rest for 30 minutes",
         )
-    ] * 20
+    ] * 1
 )
 
 sim = pybamm.Simulation(
@@ -127,17 +93,9 @@ sim = pybamm.Simulation(
 #%%
 solution = sim.solve()
 
- #%%
-# param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
-# param["Current function [A]"] = -1.675
-
-# sim = pybamm.Simulation(model, parameter_values=param)
-# solution = sim.solve([0, 7300])
-
-
-
 
 #%%
+output_variables = outmod.output_variables_spm
 sim.plot(output_variables)
 
  

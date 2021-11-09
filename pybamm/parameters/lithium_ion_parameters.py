@@ -222,6 +222,11 @@ class LithiumIonParameters(BaseParameters):
         self.L_outer_0_dim = pybamm.Parameter("Initial outer SEI thickness [m]")
         self.L_sei_0_dim = self.L_inner_0_dim + self.L_outer_0_dim
 
+        # Positive electrode degradation parameters
+        self.R_shell_dimensional = pybamm.Parameter(
+            "Positive electrode shell resistivity [Ohm.m]"
+        )
+
         # EC reaction
         self.c_ec_0_dim = pybamm.Parameter(
             "EC initial concentration in electrolyte [mol.m-3]"
@@ -803,6 +808,16 @@ class LithiumIonParameters(BaseParameters):
         self.Gamma_SEI = (
             self.V_bar_inner_dimensional * self.j_scale_n * self.timescale
         ) / (self.F * self.L_sei_0_dim)
+
+        # Positive electrode degradation parameters
+        self.R_shell = (
+            self.F
+            * self.j_scale_p
+            * self.R_shell_dimensional
+            * self.R_p_typ
+            / self.R
+            / self.T_ref
+        )
 
         # EC reaction
         self.C_ec = (
