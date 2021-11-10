@@ -1053,6 +1053,33 @@ class FiniteVolume(pybamm.SpatialMethod):
                 else:
                     raise NotImplementedError
 
+        elif isinstance(symbol, pybamm.BoundaryCellValue):
+
+            if symbol.side == "left":
+
+                sub_matrix = csr_matrix(([1], ([0], [0])), shape=(1, prim_pts))
+                additive = pybamm.Scalar(0)
+
+
+            elif symbol.side == "right":
+
+                sub_matrix = csr_matrix(
+                            ([1], ([0], [prim_pts - 1])), shape=(1, prim_pts)
+                        )
+                additive = pybamm.Scalar(0)
+
+        elif isinstance(symbol, pybamm.BoundaryCellLength):
+
+            if symbol.side == "left":
+
+                sub_matrix = csr_matrix((1, prim_pts))
+                additive = pybamm.Scalar(dx0)
+
+            elif symbol.side == "right":
+
+                sub_matrix = csr_matrix((1, prim_pts))
+                additive = pybamm.Scalar(dxN)
+
         # Generate full matrix from the submatrix
         # Convert to csr_matrix so that we can take the index (row-slicing), which is
         # not supported by the default kron format
@@ -1132,6 +1159,9 @@ class FiniteVolume(pybamm.SpatialMethod):
         # Return new binary operator with appropriate class
         out = pybamm.simplify_if_constant(
             bin_op._binary_new_copy(disc_left, disc_right)
+            # change back to previous version, otherwise 
+            # Newmannu bc incorrectly mapped
+            # bin_op.__class__(disc_left, disc_right)
         )
 
         return out
