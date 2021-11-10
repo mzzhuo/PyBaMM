@@ -78,14 +78,14 @@ param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
 experiment = pybamm.Experiment(
     [
         (
-            "Charge at 1.0 C until 4.2 V",
+            "Charge at 0.5 C until 4.2 V",
             "Hold at 4.2 V until C/50",
-            "Rest for 30 minutes",
-            # "Discharge at 1.0 C until 2.9 V",
-            # "Hold at 2.9 V until C/10",
-            # "Rest for 30 minutes",
+            "Rest for 60 minutes",
+            "Discharge at 0.1 C until 2.8 V",
+            "Hold at 2.8 V until C/50",
+            "Rest for 60 minutes",
         )
-    ] * 1
+    ] * 20
 )
 sim = pybamm.Simulation(
     model, experiment=experiment, 
