@@ -330,8 +330,28 @@ class LithiumIonParameters(BaseParameters):
 
         eps_s_p = self.epsilon_s_p(x_p)
         c_p = self.c_p_init(x_p)
-        c_p_av = pybamm.x_average(eps_s_p * c_p)
-        self.n_Li_p_init = c_p_av * self.c_p_max * self.L_p * self.A_cc
+
+        if self.options["PE degradation"] in ["yes", "on"]:
+            inputs = {"Dimensionless through-cell position (x_p)": x_p}
+            s_init_dim = pybamm.FunctionParameter(
+                "Initial phase boundary location [m]", inputs
+            )
+            lam_pe = pybamm.Scalar(1) - (s_init_dim / self.geo.R_p_typ) ** 3
+            lam_pe_av = pybamm.x_average(lam_pe)
+
+            c_c_bott_dim = pybamm.Parameter(
+            "Minimum concentration in core when fully charged [mol.m-3]")
+            c_c_bott = c_c_bott_dim / self.c_p_max
+            c_p_av = pybamm.x_average(eps_s_p * (c_p - c_c_bott))
+            self.n_Li_p_init = (
+                c_p_av * self.c_p_max
+                * self.L_p 
+                * self.A_cc 
+                * (1 - lam_pe_av)
+            )
+        else:
+            c_p_av = pybamm.x_average(eps_s_p * c_p)
+            self.n_Li_p_init = c_p_av * self.c_p_max * self.L_p * self.A_cc
 
         self.n_Li_particles_init = self.n_Li_n_init + self.n_Li_p_init
         self.n_Li_init = self.n_Li_particles_init + self.n_Li_e_init
@@ -529,9 +549,14 @@ class LithiumIonParameters(BaseParameters):
     def c_p_init_dimensional(self, x):
         """Initial concentration as a function of dimensionless position x"""
         inputs = {"Dimensionless through-cell position (x_p)": x}
-        return pybamm.FunctionParameter(
-            "Initial concentration in positive electrode [mol.m-3]", inputs
-        )
+        if self.options["PE degradation"] in ["yes", "on"]:
+            return pybamm.FunctionParameter(
+                "Initial concentration in positive core [mol.m-3]", inputs
+            )
+        else:
+            return pybamm.FunctionParameter(
+                "Initial concentration in positive electrode [mol.m-3]", inputs
+            )
 
     def _set_scales(self):
         """Define the scales used in the non-dimensionalisation scheme"""
