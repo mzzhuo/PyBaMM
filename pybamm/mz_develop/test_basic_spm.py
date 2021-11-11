@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # %%
 
 # model = pybamm.lithium_ion.BasicSPM()
-model = pybamm.lithium_ion.BasicSPMTest({"PE phase transition": "yes"})
+model = pybamm.lithium_ion.BasicSPMTest({"PE degradation": "yes"})
 
 
 #%%
@@ -80,7 +80,11 @@ plot.dynamic_plot()
 
 
 
+#%%
 
+cn = model.variables["X-averaged negative particle concentration"]
+cn_rav = pybamm.r_average(cn)
+disc_cnrav = disc.process_symbol(cn_rav)
 
 
 
