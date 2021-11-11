@@ -17,7 +17,7 @@ output_variables_spm = [
     "Terminal voltage [V]",
     # "X-averaged positive electrode temperature [K]",
     # "X-averaged time derivative of moving phase boundary location",
-    # "Loss of active material in positive electrode (MZ)",
+    "Loss of active material in positive electrode (MZ)",
     "X-averaged loss of active material in positive electrode (MZ)",
     # "X-averaged positive electrode interfacial current density [A.m-2]",
     # "Loss of active material in positive electrode [%]",
@@ -34,11 +34,12 @@ output_variables_spm.extend(
             "Total lithium in negative electrode [mol]",
             "Total lithium [mol]",
         ],
-        "Loss of lithium inventory [%]",
+        # "Loss of lithium inventory",
+        "LLI",
         # "Positive electrode interfacial current density [A.m-2]",
         # "Negative electrode interfacial current density [A.m-2]",
-        # "X-averaged PE shell layer overpotential [V]",
-        "PE shell layer overpotential [V]"
+        "X-averaged PE shell layer overpotential [V]",
+        # "PE shell layer overpotential [V]"
         # "Electrolyte concentration [mol.m-3]",
         # "Negative electrode potential [V]",
         # "Electrolyte potential [V]",
@@ -90,7 +91,7 @@ output_variables_dfn.extend(
         "Total lithium in negative electrode [mol]",
         "Total lithium [mol]",
         ],
-        "LLI [%]",
+        "Loss of lithium inventory",
         "X-averaged PE shell layer overpotential [V]",
         # "PE shell layer overpotential [V]",
         "Positive electrode interfacial current density [A.m-2]",
@@ -101,7 +102,80 @@ output_variables_dfn.extend(
     ]
 )
 
-    
+#%%
+output_variables_spm_par = [
+    "X-averaged negative particle concentration [mol.m-3]",
+    "X-averaged positive particle concentration [mol.m-3]",
+    #---------------------------------------------------------
+    "Current [A]",
+    "Terminal voltage [V]",
+    # "X-averaged positive electrode temperature [K]",
+    # "X-averaged positive electrode interfacial current density [A.m-2]",
+    # "Positive electrode interfacial current density [A.m-2]",
+    # "Negative electrode interfacial current density [A.m-2]",
+    "Discharge capacity [A.h]",
+    # "Total charge throughput [A.h]"
+]
+#%
+output_variables_spm_par.extend(
+    [
+        #---------------------------------------------------------
+        [
+            "Total lithium in positive electrode [mol]",
+            "Total lithium in negative electrode [mol]",
+            "Total lithium [mol]",
+        ],
+        "Loss of lithium inventory",
+        "Electrolyte concentration [mol.m-3]",
+        "Negative electrode potential [V]",
+        "Electrolyte potential [V]",
+        "Positive electrode potential [V]",
+        "Positive electrode reaction overpotential",
+        "Negative electrode reaction overpotential"
+    ]
+)
+
+#%%
+output_variables_dfn_par = [
+    # "R-averaged negative particle concentration [mol.m-3]",
+    # "R-averaged positive particle concentration [mol.m-3]",
+    "Negative particle surface concentration [mol.m-3]",
+    "Positive particle surface concentration [mol.m-3]",
+    # "X-averaged negative particle concentration [mol.m-3]",
+    # "X-averaged positive particle concentration [mol.m-3]",
+    #---------------------------------------------------------
+    "Current [A]",
+    "Terminal voltage [V]",
+    # "X-averaged positive electrode temperature [K]",
+    # "X-averaged positive electrode interfacial current density [A.m-2]",
+    # "Positive electrode interfacial current density [A.m-2]",
+    # "Negative electrode interfacial current density [A.m-2]",
+    "Discharge capacity [A.h]",
+    # "Total charge throughput [A.h]"
+]
+#%
+output_variables_dfn_par.extend(
+    [
+        #---------------------------------------------------------
+        [
+            "Total lithium in positive electrode [mol]",
+            "Total lithium in negative electrode [mol]",
+            "Total lithium [mol]",
+        ],
+        "Loss of lithium inventory",
+        "Electrolyte concentration [mol.m-3]",
+        "Negative electrode potential [V]",
+        "Electrolyte potential [V]",
+        "Positive electrode potential [V]",
+        "Positive electrode reaction overpotential [V]",
+        "Negative electrode reaction overpotential [V]",
+        "Positive electrode open circuit potential [V]",
+        "Negative electrode open circuit potential [V]",
+    ]
+)
+
+
+#%%
 # output_variables.extend(
 #     [
 #         "Moving phase boundary location",

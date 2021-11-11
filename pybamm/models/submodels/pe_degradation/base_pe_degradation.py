@@ -164,7 +164,7 @@ class BasePeDegradation(pybamm.BaseSubModel):
 
         # MZ definition of loss of active material in PE
         # that is, the fraction of shell phase
-        lam_pe = 1 - s ** 3
+        lam_pe = pybamm.Scalar(1) - s ** 3
         lam_pe_av = pybamm.x_average(lam_pe)
 
         variables = {
@@ -244,8 +244,10 @@ class BasePeDegradation(pybamm.BaseSubModel):
             v = pybamm.FullBroadcast(
                 pybamm.Scalar(1), symbol.domain, symbol.auxiliary_domains
             )
+            # cartesian coordinate
             # coeff = 4 * np.pi * (eta * s) ** 2 * s
             # return pybamm.Integral(coeff * symbol, eta) / pybamm.Integral(coeff * v, eta)
+            # spherical polar
             return pybamm.Integral(symbol, eta) / pybamm.Integral(v, eta)
         elif symbol.domain in [["positive shell"], ["positive shell oxygen"]]:
             chi = pybamm.SpatialVariable("chi", symbol.domain, symbol.auxiliary_domains)
@@ -261,7 +263,7 @@ class BasePeDegradation(pybamm.BaseSubModel):
 
     def _get_total_concentration_variables(self, variables):
 
-        s = variables["Moving phase boundary location"]
+        # s = variables["Moving phase boundary location"]
         c_c_rav = variables["R-averaged positive core concentration"]
 
         eps_p = variables["Positive electrode active material volume fraction"]

@@ -64,7 +64,8 @@ import matplotlib.pyplot as plt
 import pybamm.mz_develop.output_module as outmod
 
 # %%
-model = pybamm.lithium_ion.DFN({"PE degradation": "yes"})
+model = pybamm.lithium_ion.DFN({"PE degradation": "none"})
+
 #%
 param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Zhuo2021)
 # param = pybamm.ParameterValues(chemistry=pybamm.parameter_sets.Chen2020)
@@ -79,13 +80,13 @@ experiment = pybamm.Experiment(
     [
         (
             "Charge at 0.5 C until 4.2 V",
-            "Hold at 4.2 V until C/50",
-            "Rest for 60 minutes",
-            "Discharge at 0.1 C until 2.8 V",
-            "Hold at 2.8 V until C/50",
-            "Rest for 60 minutes",
+            # "Hold at 4.2 V until C/50",
+            # "Rest for 60 minutes",
+            # "Discharge at 0.1 C until 2.8 V",
+            # "Hold at 2.8 V until C/50",
+            # "Rest for 60 minutes",
         )
-    ] * 20
+    ] * 1
 )
 sim = pybamm.Simulation(
     model, experiment=experiment, 
@@ -95,8 +96,8 @@ sim = pybamm.Simulation(
 solution = sim.solve(calc_esoh=False)
 
 #%%
-output_variables = outmod.output_variables_dfn
 
+output_variables = outmod.output_variables_dfn_par
 sim.plot(output_variables)
 # sim.plot(output_variables,n_rows=2)
 
