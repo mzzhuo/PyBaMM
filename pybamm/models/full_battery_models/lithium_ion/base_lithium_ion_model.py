@@ -128,9 +128,11 @@ class BaseModel(pybamm.BaseBatteryModel):
                 "LAM_ne [%]": LAM_ne,
                 "LAM_pe [%]": LAM_pe,
                 "LLI [%]": LLI,
+                "LLI": LLI / 100,
                 "Loss of active material in negative electrode [%]": LAM_ne,
                 "Loss of active material in positive electrode [%]": LAM_pe,
                 "Loss of lithium inventory [%]": LLI,
+                "Loss of lithium inventory": LLI / 100,
                 "Loss of lithium inventory, including electrolyte [%]": LLI_tot,
                 # Total lithium
                 "Total lithium [mol]": n_Li,
