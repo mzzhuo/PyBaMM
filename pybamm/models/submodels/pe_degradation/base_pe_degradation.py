@@ -91,22 +91,27 @@ class BasePeDegradation(pybamm.BaseSubModel):
         c_c_bott_dim = pybamm.Parameter(
             "Minimum concentration in core when fully charged [mol.m-3]")
 
-        self.c_o_core = c_o_core_dim / self.param.c_p_max
+        self.c_o_typ = c_o_core_dim # self.param.c_p_max
+        self.c_o_core = c_o_core_dim / self.c_o_typ
+
         self.c_p_thrd = c_p_thrd_dim / self.param.c_p_max
         self.c_s_trap = c_s_trap_dim / self.param.c_p_max
         self.c_c_bott = c_c_bott_dim / self.param.c_p_max
 
+        self.k_1_typ = self.k_1_dimensional(self.param.T_ref)
+        self.k_2_typ = self.k_2_dimensional(self.param.T_ref)
+
         # dimensionless coefficients relating to chemical reactions
         self.kappa_1 = (
-            self.k_1_dimensional(self.param.T_ref) 
+            self.k_1_typ
             * self.param.timescale
             / self.param.R_p_typ
         )
         self.kappa_2 = (
-            self.k_2_dimensional(self.param.T_ref) 
+            self.k_2_typ
             * self.param.timescale
             / self.param.R_p_typ
-            * self.param.c_p_max
+            * self.c_o_typ
         )
 
     def _get_standard_concentration_variables(
@@ -194,15 +199,15 @@ class BasePeDegradation(pybamm.BaseSubModel):
             #
             # for shell concentration of oxygen c_o
             "Positive shell concentration of oxygen": c_o,
-            "Positive shell concentration of oxygen [mol.m-3]": c_o * c_scale,
+            "Positive shell concentration of oxygen [mol.m-3]": c_o * self.c_o_typ,
             "X-averaged positive shell concentration of oxygen": c_o_xav,
-            "X-averaged positive shell concentration of oxygen [mol.m-3]": c_o_xav * c_scale,
+            "X-averaged positive shell concentration of oxygen [mol.m-3]": c_o_xav * self.c_o_typ,
             "R-averaged positive shell concentration of oxygen": c_o_rav,
-            "R-averaged positive shell concentration of oxygen [mol.m-3]": c_o_rav * c_scale,
+            "R-averaged positive shell concentration of oxygen [mol.m-3]": c_o_rav * self.c_o_typ,
             "Positive shell center concentration of oxygen": c_o_cent,
-            "Positive shell center concentration of oxygen [mol.m-3]": c_scale * c_o_cent,
+            "Positive shell center concentration of oxygen [mol.m-3]": c_o_cent * self.c_o_typ,
             "X-averaged positive shell center concentration of oxygen": c_o_cent_av,
-            "X-averaged positive shell center concentration of oxygen [mol.m-3]": c_scale * c_o_cent_av,
+            "X-averaged positive shell center concentration of oxygen [mol.m-3]": c_o_cent_av * self.c_o_typ,
             # for moving phase boundary
             "Moving phase boundary location": s,
             "Moving phase boundary location [m]": s * R_scale,
@@ -340,7 +345,7 @@ class BasePeDegradation(pybamm.BaseSubModel):
     def k_1(self, T):
         """Dimensionless forward chemical reaction coefficient"""
         T_dim = self.param.Delta_T * T + self.param.T_ref
-        return self.k_1_dimensional(T_dim) / self.k_1_dimensional(self.param.T_ref)
+        return self.k_1_dimensional(T_dim) / self.k_1_typ
 
     def k_2_dimensional(self, T):
         """Dimensional reverse chemical reaction coefficient"""
@@ -350,7 +355,7 @@ class BasePeDegradation(pybamm.BaseSubModel):
     def k_2(self, T):
         """Dimensionless reverse chemical reaction coefficient"""
         T_dim = self.param.Delta_T * T + self.param.T_ref
-        return self.k_2_dimensional(T_dim) / self.k_2_dimensional(self.param.T_ref)
+        return self.k_2_dimensional(T_dim) / self.k_2_typ
 
     def c_c_init_dimensional(self, x):
         """Initial concentration as a function of dimensionless position x"""
@@ -376,7 +381,7 @@ class BasePeDegradation(pybamm.BaseSubModel):
         """
         Dimensionless initial oxygen concentration as a function of dimensionless position x
         """
-        return self.c_o_init_dimensional(psi) / self.param.c_p_max
+        return self.c_o_init_dimensional(psi) / self.c_o_typ
 
     def s_init_dimensional(self, x):
         """Initial phase boundary location as a function of dimensionless position x"""
