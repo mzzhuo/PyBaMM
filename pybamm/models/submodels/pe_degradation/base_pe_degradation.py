@@ -394,4 +394,4 @@ class BasePeDegradation(pybamm.BaseSubModel):
         """
         Dimensionless phase boundary location as a function of dimensionless position x
         """
-        return self.s_init_dimensional(x) / self.param.R_p_typ
+        return self.s_init_dimensional(x) / self.param.R_p_dimensional(x * self.param.L_x)
