@@ -109,15 +109,10 @@ class PeDegradationSingleParticle(BasePeDegradation):
         # not extrapolated afterwards
         c_share_xav = (
             (D_c / s_xav / self.C_c / dx_cp_av * c_c_N_av 
-             - 1 / self.param.a_R_p / self.param.gamma_p * j_xav / (s_xav ** 2)
+             - 1 / self.param.C_d / self.param.a_R_p / self.param.gamma_p * j_xav / (s_xav ** 2)
              + s_dot * self.c_s_trap)
             / (D_c / s_xav / self.C_c / dx_cp_av + s_dot)
         )
-        # c_share_xav = (
-        #     (D_c / s_xav / self.C_c / dx_cp_av * c_c_N_av 
-        #      - 1 / self.param.a_R_p / self.param.gamma_p * j_xav / (s_xav ** 2))
-        #     / (D_c / s_xav / self.C_c / dx_cp_av)
-        # )
         c_share = pybamm.PrimaryBroadcast(c_share_xav, ["positive electrode"])
 
         # boundary oxygen concentration from applied bc

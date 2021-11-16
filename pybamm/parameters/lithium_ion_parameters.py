@@ -664,6 +664,7 @@ class LithiumIonParameters(BaseParameters):
         self.C_n = self.tau_diffusion_n / self.timescale
         self.C_p = self.tau_diffusion_p / self.timescale
         self.C_e = self.tau_diffusion_e / self.timescale
+        self.C_d = self.tau_discharge / self.timescale
         self.C_r_n = self.tau_r_n / self.timescale
         self.C_r_p = self.tau_r_p / self.timescale
         self.C_th = self.tau_th_yz / self.timescale
