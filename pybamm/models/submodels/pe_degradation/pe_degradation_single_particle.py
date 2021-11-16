@@ -79,7 +79,7 @@ class PeDegradationSingleParticle(BasePeDegradation):
         ) 
         # s_dot = pybamm.Scalar(-0.07)
 
-        # get c_share and c_o at boundary
+        # get c_c and c_o at boundary
         c_c_xav = variables["X-averaged positive core concentration"]
         c_o_xav = variables["X-averaged positive shell concentration of oxygen"]
         s_xav = variables["X-averaged moving phase boundary location"]
@@ -106,13 +106,13 @@ class PeDegradationSingleParticle(BasePeDegradation):
 
         # the interface boundary value is calculated from applied boundary condition
         # not extrapolated afterwards
-        c_share_xav = (
+        c_c_b_xav = (
             (D_c / s_xav / self.C_c / dx_cp_av * c_c_N_av 
              - 1 / self.param.C_d / self.param.a_R_p / self.param.gamma_p * j_xav / (s_xav ** 2)
              + s_dot * self.c_s_trap)
             / (D_c / s_xav / self.C_c / dx_cp_av + s_dot)
         )
-        c_share = pybamm.PrimaryBroadcast(c_share_xav, ["positive electrode"])
+        c_c_b = pybamm.PrimaryBroadcast(c_c_b_xav, ["positive electrode"])
 
         # boundary oxygen concentration from applied bc
         # not extrapolated afterwards
@@ -125,12 +125,12 @@ class PeDegradationSingleParticle(BasePeDegradation):
         variables.update(
             {
                 "X-averaged time derivative of moving phase boundary location": s_dot,
-                "X-averaged shared concentration at core-shell interface": c_share_xav,
-                "X-averaged shared concentration at core-shell interface [mol.m-3]": 
-                    c_share_xav * self.param.c_p_max,
-                "Shared concentration at core-shell interface": c_share,
-                "Shared concentration at core-shell interface [mol.m-3]": 
-                    c_share * self.param.c_p_max,
+                "X-averaged lithium concentration at core-shell interface": c_c_b_xav,
+                "X-averaged lithium concentration at core-shell interface [mol.m-3]": 
+                    c_c_b_xav * self.param.c_p_max,
+                "Lithium concentration at core-shell interface": c_c_b,
+                "Lithium concentration at core-shell interface [mol.m-3]": 
+                    c_c_b * self.param.c_p_max,
                 "X-averaged oxygen concentration at core-shell interface": c_o_b_xav,
                 "X-averaged oxygen concentration at core-shell interface [mol.m-3]": 
                     c_o_b_xav * self.param.c_p_max,
@@ -200,10 +200,10 @@ class PeDegradationSingleParticle(BasePeDegradation):
         dx_cp_av = variables["X-averaged positive core surface cell length"] 
         dx_co_av = variables["X-averaged positive shell center cell length of oxygen"]
 
-        c_share = variables["X-averaged shared concentration at core-shell interface"]
+        c_c_b = variables["X-averaged lithium concentration at core-shell interface"]
         c_o_b   = variables["X-averaged oxygen concentration at core-shell interface"]
 
-        rbc_cc = (c_share - c_c_N_av) / dx_cp_av
+        rbc_cc = (c_c_b - c_c_N_av) / dx_cp_av
         lbc_co = (c_o_1_av - c_o_b) / dx_co_av
 
         self.boundary_conditions[c_c_xav] = {
