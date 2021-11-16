@@ -47,7 +47,6 @@ class PeDegradationManyParticle(BasePeDegradation):
                 "secondary": "positive electrode",
                 "tertiary": "current collector",
             },
-            bounds=(0, 1),
         )
 
         # location of two-phase boundary

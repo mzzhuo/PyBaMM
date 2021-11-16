@@ -44,7 +44,6 @@ class PeDegradationSingleParticle(BasePeDegradation):
             "X-averaged positive shell concentration of oxygen",
             domain="positive shell oxygen",
             auxiliary_domains={"secondary": "current collector"},
-            bounds=(0, 1),
         )
         c_o = pybamm.SecondaryBroadcast(c_o_xav, ["positive electrode"])
 
