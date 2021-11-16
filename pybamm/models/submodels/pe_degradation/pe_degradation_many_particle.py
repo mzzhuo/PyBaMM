@@ -106,7 +106,7 @@ class PeDegradationManyParticle(BasePeDegradation):
         # not extrapolated afterwards
         c_share = (
             (D_c / s / self.C_c / dx_cp * c_c_N 
-             - 1 / self.param.a_R_p / self.param.gamma_p * j / R / (s ** 2)
+             - 1 / self.param.C_d / self.param.a_R_p / self.param.gamma_p * j / R / (s ** 2)
              + s_dot * self.c_s_trap)
             / (D_c / s / self.C_c / dx_cp + s_dot)
         )
