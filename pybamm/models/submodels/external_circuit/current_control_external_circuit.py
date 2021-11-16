@@ -13,6 +13,7 @@ class CurrentControl(BaseModel):
 
     def get_fundamental_variables(self):
         # Current is given as a function of time
+        # dimensionless current = dimensionless current density
         i_cell = self.param.current_with_time
         i_cell_dim = self.param.dimensional_current_density_with_time
         I = self.param.dimensional_current_with_time
