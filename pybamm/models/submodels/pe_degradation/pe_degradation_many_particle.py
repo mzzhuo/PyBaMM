@@ -219,9 +219,6 @@ class PeDegradationManyParticle(BasePeDegradation):
         s = variables["Moving phase boundary location"]
 
         x_p = pybamm.standard_spatial_vars.x_p
-        # x_p_p = pybamm.PrimaryBroadcast(x_p, "positive core")
-        # x_p_s = pybamm.PrimaryBroadcast(x_p, "positive shell")
-        # x_p_o = pybamm.PrimaryBroadcast(x_p, "positive shell oxygen")
 
         eta = pybamm.pe_degradation.eta
         psi = pybamm.pe_degradation.psi
