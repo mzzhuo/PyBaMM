@@ -15,9 +15,10 @@ class BaseModel(pybamm.BaseSubModel):
         # Q_thrpt = pybamm.standard_variables.Q_thrpt
         variables = {
             "Discharge capacity [A.h]": Q,
+            "Charge capacity [A.h]": -Q,
             # "Total charge throughput [A.h]": Q_thrpt
             # divided by "Nominal cell capacity [A.h]"
-            "SoC": Q / self.param.Q,
+            "SoC": -Q / self.param.Q,
         }
         return variables
 
