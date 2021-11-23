@@ -75,9 +75,10 @@ class PeDegradationManyParticle(BasePeDegradation):
             "Positive shell center concentration of oxygen"
         ]
         c_c_surf = variables["Positive core surface concentration"]
+        R = variables["Positive particle radius"]
 
         s_dot = ( 
-            -(self.kappa_1 * self.k_1(T) - self.kappa_2 * self.k_2(T) * c_o_cent)
+            -(self.kappa_1 * self.k_1(T) / R - self.kappa_2 * self.k_2(T) / R * c_o_cent)
             * pybamm.EqualHeaviside(c_c_surf, self.c_p_thrd)
         )
         # s_dot = pybamm.Scalar(-0.07)
@@ -100,23 +101,23 @@ class PeDegradationManyParticle(BasePeDegradation):
         dx_co = variables["Positive shell center cell length of oxygen"]
 
         j = variables["Positive electrode interfacial current density"]
-        R = variables["Positive particle radius"]
 
         # the interface boundary value is calculated from applied boundary condition
         # not extrapolated afterwards
         c_c_b = (
-            (D_c / s / self.C_c / dx_cp * c_c_N 
-             - 1 / self.param.C_d / self.param.a_R_p / self.param.gamma_p * j * R / (s ** 2)
-             + s_dot * self.c_s_trap)
-            / (D_c / s / self.C_c / dx_cp + s_dot)
+            (c_c_N - dx_cp / D_c * (
+              self.C_c / self.param.C_d * R * s / self.param.a_R_p / self.param.gamma_p * j / (s ** 2)
+              - self.C_c * (R ** 2) * s * s_dot * self.c_s_trap)
+            )
+            / (1 + dx_cp / D_c * self.C_c * (R ** 2) * s * s_dot)
         )
         c_c_b_xav = pybamm.x_average(c_c_b)
 
         # boundary oxygen concentration from applied bc
         # not extrapolated afterwards
         c_o_b = (
-            (D_o / self.C_o / dx_co * c_o_1 - s_dot * (1 - s) * self.c_o_core)
-            / (D_o / self.C_o / dx_co - s_dot * (1 - s))
+            (c_o_1 - dx_co / D_o * self.C_o * (R ** 2) * s_dot * (1 - s) * self.c_o_core)
+            / (1 - dx_co / D_o * self.C_o * (R ** 2) * s_dot * (1 - s))
         )
         c_o_b_xav = pybamm.x_average(c_o_b)
 
@@ -166,12 +167,12 @@ class PeDegradationManyParticle(BasePeDegradation):
 
         self.rhs[c_c] = (
             pybamm.inner(eta * s_dot / s, pybamm.grad(c_c)) 
-            + 1 / (R ** 2 * self.C_c) / (s ** 2) 
+            + 1 / R ** 2 / self.C_c / (s ** 2) 
             * pybamm.div(D_c * pybamm.grad(c_c))
         )
         self.rhs[c_o] = (
             pybamm.inner((1 - psi) * s_dot / (1 - s), pybamm.grad(c_o))
-            + 1 / (R ** 2 * self.C_o) / ((1 - s) ** 2 * (psi * (1 - s) + s) ** 2)
+            + 1 / R ** 2 / self.C_o / ((1 - s) ** 2 * (psi * (1 - s) + s) ** 2)
             * pybamm.div((psi * (1 - s) + s) ** 2 * D_o * pybamm.grad(c_o))
         )
         self.rhs[s] = s_dot

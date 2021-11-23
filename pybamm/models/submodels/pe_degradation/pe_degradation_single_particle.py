@@ -107,18 +107,19 @@ class PeDegradationSingleParticle(BasePeDegradation):
         # the interface boundary value is calculated from applied boundary condition
         # not extrapolated afterwards
         c_c_b_xav = (
-            (D_c / s_xav / self.C_c / dx_cp_av * c_c_N_av 
-             - 1 / self.param.C_d / self.param.a_R_p / self.param.gamma_p * j_xav / (s_xav ** 2)
-             + s_dot * self.c_s_trap)
-            / (D_c / s_xav / self.C_c / dx_cp_av + s_dot)
+            (c_c_N_av - dx_cp_av / D_c * (
+              self.C_c / self.param.C_d * s_xav / self.param.a_R_p / self.param.gamma_p * j_xav / (s_xav ** 2)
+              - self.C_c * s_xav * s_dot * self.c_s_trap)
+            )
+            / (1 + dx_cp_av / D_c * self.C_c * s_xav * s_dot)
         )
         c_c_b = pybamm.PrimaryBroadcast(c_c_b_xav, ["positive electrode"])
 
         # boundary oxygen concentration from applied bc
         # not extrapolated afterwards
         c_o_b_xav = (
-            (D_o / self.C_o / dx_co_av * c_o_1_av - s_dot * (1 - s_xav) * self.c_o_core)
-            / (D_o / self.C_o / dx_co_av - s_dot * (1 - s_xav))
+            (c_o_1_av - dx_co_av / D_o * self.C_o * s_dot * (1 - s_xav) * self.c_o_core)
+            / (1 - dx_co_av / D_o * self.C_o * s_dot * (1 - s_xav))
         )
         c_o_b = pybamm.PrimaryBroadcast(c_o_b_xav, ["positive electrode"])
 
