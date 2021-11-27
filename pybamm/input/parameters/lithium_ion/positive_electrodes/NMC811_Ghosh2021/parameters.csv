@@ -6,7 +6,7 @@ Positive electrode conductivity [S.m-1],100,Sturm 2019,
 Maximum concentration in positive electrode [mol.m-3],49340,,
 # PE diffusivity goes to pe degradation subfolder
 Positive electrode diffusivity [m2.s-1],[function]nmc811_diffusivity,,
-Positive electrode OCP [V],[data]NMC_OCP,,
+Positive electrode OCP [V],[data]NMC_OCP_ori,,
 ,,,
 # Microstructure,,,
 Positive electrode porosity,0.171,Sturm 2019,
