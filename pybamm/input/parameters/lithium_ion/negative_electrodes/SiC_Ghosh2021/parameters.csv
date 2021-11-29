@@ -6,7 +6,7 @@ Name [units],Value,Reference,Notes
 Negative electrode conductivity [S.m-1],215,Chen 2020,graphite
 Maximum concentration in negative electrode [mol.m-3],34257,,
 Negative electrode diffusivity [m2.s-1],[function]sic_diffusivity,,
-Negative electrode OCP [V],[data]SiC_OCP_ori,,
+Negative electrode OCP [V],[data]SiC_OCP,,
 ,,,
 # Microstructure,,,
 Negative electrode porosity,0.216,Sturm 2019,
