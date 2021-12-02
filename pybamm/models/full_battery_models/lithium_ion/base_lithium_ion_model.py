@@ -145,6 +145,23 @@ class BaseModel(pybamm.BaseBatteryModel):
             }
         )
 
+        # LLI of cyclable lithium 
+        if self.options["PE degradation"] in ["yes", "on"]:
+            n_Li_p_cyc = self.variables["Total cyclable lithium in positive electrode [mol]"]
+            n_Li_n_cyc = self.variables["Total cyclable lithium in negative electrode [mol]"]
+            n_Li_particles_cyc = n_Li_n_cyc + n_Li_p_cyc
+            LLI_cyc = (1 - n_Li_particles_cyc / param.n_Li_particles_init_cyc)
+
+            self.variables.update(
+                {
+                    "LLI_cyc": LLI_cyc,
+                    "Loss of cyclable lithium inventory": LLI_cyc,
+                    # Total lithium
+                    "Total cyclable lithium [mol]": n_Li_particles_cyc + n_Li_e,
+                    "Total cyclable lithium in particles [mol]": n_Li_particles_cyc,
+                }
+            )
+
         # Lithium lost to side reactions
         # Different way of measuring LLI but should give same value
         LLI_sei = self.variables["Loss of lithium to SEI [mol]"]

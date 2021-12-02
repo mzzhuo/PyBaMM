@@ -89,7 +89,9 @@ class BasePeDegradation(pybamm.BaseSubModel):
         c_s_trap_dim = pybamm.Parameter(
             "Trapped lithium concentration in shell [mol.m-3]")
         c_c_bott_dim = pybamm.Parameter(
-            "Minimum concentration in core when fully charged [mol.m-3]")
+            "Minimum concentration in positive core when fully charged [mol.m-3]")
+        c_n_bott_dim = pybamm.Parameter(
+            "Minimum concentration in negative particle when fully discharged [mol.m-3]")
 
         self.c_o_typ = c_o_core_dim # self.param.c_p_max
         self.c_o_core = c_o_core_dim / self.c_o_typ
@@ -97,6 +99,7 @@ class BasePeDegradation(pybamm.BaseSubModel):
         self.c_p_thrd = c_p_thrd_dim / self.param.c_p_max
         self.c_s_trap = c_s_trap_dim / self.param.c_p_max
         self.c_c_bott = c_c_bott_dim / self.param.c_p_max
+        self.c_n_bott = c_n_bott_dim / self.param.c_n_max
 
         self.k_1_typ = self.k_1_dimensional(self.param.T_ref)
         self.k_2_typ = self.k_2_dimensional(self.param.T_ref)
@@ -276,12 +279,24 @@ class BasePeDegradation(pybamm.BaseSubModel):
 
         lam_pe_av = variables["X-averaged loss of active material in positive electrode (MZ)"]
 
+        # total lithium in core
         c_c_vol_av = (
             # pybamm.x_average(eps_p * (c_c_rav * s ** 3 + self.c_s_trap * (1 - s ** 3))) 
+            pybamm.x_average(eps_p * c_c_rav) # concentration in shell not taken into account
+            / eps_p_av
+        )
+        # total cyclable lithium in core
+        c_c_vol_av_cyc = (
             pybamm.x_average(eps_p * (c_c_rav - self.c_c_bott)) # concentration in shell not taken into account
             / eps_p_av
         )
         c_scale = self.param.c_p_max
+
+        # total cyclable lithium in negative particle
+        c_n_rav = variables["R-averaged negative particle concentration"]
+        eps_n = variables["Negative electrode active material volume fraction"]
+        eps_n_av = pybamm.x_average(eps_n)
+        c_n_vol_av_cyc = pybamm.x_average(eps_n * (c_n_rav - self.c_n_bott)) / eps_n_av
 
         # Positive electrode thickness [m]
         L = self.param.L_p
@@ -298,6 +313,17 @@ class BasePeDegradation(pybamm.BaseSubModel):
                     * c_scale 
                     * L * A * eps_p_av  # PE active material volume
                     * (1 - lam_pe_av)   # remove degraded shell fraction
+                ),
+                "Total cyclable lithium in positive electrode [mol]": pybamm.yz_average(
+                    c_c_vol_av_cyc 
+                    * c_scale 
+                    * L * A * eps_p_av  # PE active material volume
+                    * (1 - lam_pe_av)   # remove degraded shell fraction
+                ),
+                "Total cyclable lithium in negative electrode [mol]": pybamm.yz_average(
+                    c_n_vol_av_cyc 
+                    * self.param.c_n_max 
+                    * self.param.L_n * A * eps_n_av  # NE active material volume
                 ),
             }
         )

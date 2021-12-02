@@ -330,8 +330,14 @@ class LithiumIonParameters(BaseParameters):
 
         eps_s_p = self.epsilon_s_p(x_p)
         c_p = self.c_p_init(x_p)
+        c_p_av = pybamm.x_average(eps_s_p * c_p)
+        self.n_Li_p_init = c_p_av * self.c_p_max * self.L_p * self.A_cc
+
+        self.n_Li_particles_init = self.n_Li_n_init + self.n_Li_p_init
+        self.n_Li_init = self.n_Li_particles_init + self.n_Li_e_init
 
         if self.options["PE degradation"] in ["yes", "on"]:
+            # initial cyclable lithium in PE
             inputs = {"Dimensionless through-cell position (x_p)": x_p}
             s_init_dim = pybamm.FunctionParameter(
                 "Initial phase boundary location [m]", inputs
@@ -340,21 +346,26 @@ class LithiumIonParameters(BaseParameters):
             lam_pe_av = pybamm.x_average(lam_pe)
 
             c_c_bott_dim = pybamm.Parameter(
-            "Minimum concentration in core when fully charged [mol.m-3]")
+            "Minimum concentration in positive core when fully charged [mol.m-3]")
             c_c_bott = c_c_bott_dim / self.c_p_max
-            c_p_av = pybamm.x_average(eps_s_p * (c_p - c_c_bott))
-            self.n_Li_p_init = (
-                c_p_av * self.c_p_max
+            c_p_av_cyc = pybamm.x_average(eps_s_p * (c_p - c_c_bott))
+            self.n_Li_p_init_cyc = (
+                c_p_av_cyc * self.c_p_max
                 * self.L_p 
                 * self.A_cc 
                 * (1 - lam_pe_av)
             )
-        else:
-            c_p_av = pybamm.x_average(eps_s_p * c_p)
-            self.n_Li_p_init = c_p_av * self.c_p_max * self.L_p * self.A_cc
+            # initial cyclable lithium in NE
+            eps_s_n = self.epsilon_s_n(x_n)
+            c_n = self.c_n_init(x_n)
+            c_n_bott_dim = pybamm.Parameter(
+            "Minimum concentration in negative particle when fully discharged [mol.m-3]")
+            c_n_bott = c_n_bott_dim / self.c_n_max
+            c_n_av_cyc = pybamm.x_average(eps_s_n * (c_n - c_n_bott))
+            self.n_Li_n_init_cyc = c_n_av_cyc * self.c_n_max * self.L_n * self.A_cc
 
-        self.n_Li_particles_init = self.n_Li_n_init + self.n_Li_p_init
-        self.n_Li_init = self.n_Li_particles_init + self.n_Li_e_init
+            self.n_Li_particles_init_cyc = self.n_Li_n_init_cyc + self.n_Li_p_init_cyc
+
         # loss of active material parameters
         self.m_LAM_n = pybamm.Parameter(
             "Negative electrode LAM constant exponential term"
