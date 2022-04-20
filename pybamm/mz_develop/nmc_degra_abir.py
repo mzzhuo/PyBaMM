@@ -162,6 +162,11 @@ s_dot = -(k_1_scaled - k_2_scaled * c_o_cent) / c_o_core_scaled * pybamm.EqualHe
 # pybamm.sigmoid(c_p_surf, c_p_thrd, 10)
 # .evaluate().astype(float)
 # s_dot = pybamm.Scalar(0) 
+# matlab code
+# x = -10:0.01:10;
+# y = (1 + tanh(1*x)) ./ 2;
+# figure
+# plot(x,y,'-')
 
 k_p = k_p_ref * pybamm.arrhenius(aEne_surf_reac_p, T_ref, T * T_ref)
 k_n = k_n_ref * pybamm.arrhenius(aEne_surf_reac_n, T_ref, T * T_ref)
