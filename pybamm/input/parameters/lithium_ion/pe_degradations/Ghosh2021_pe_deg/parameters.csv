@@ -1,0 +1,44 @@
+Name [units],Value,Reference,Notes
+# Empty rows and rows starting with ‘#’ will be ignored,,,
+,,,
+# Positive electrode shell layer properties,,,
+,,,
+Positive core diffusivity [m2.s-1],[function]nmc811_diffusivity,,
+Positive shell diffusivity [m2.s-1],[function]nmc811_diffusivity_degraded,,
+# Positive shell diffusivity [m2.s-1],[function]nmc811_diffusivity,,
+Positive shell oxygen diffusivity [m2.s-1],1E-17,,
+,,,
+# chemical reaction properties
+# Forward chemical reaction coefficient [m.s-1],2.631578947368421e-11,,
+# Reverse chemical reaction coefficient [m4.mol-1.s-1],5.33356089859834e-16,,
+Forward chemical reaction coefficient [m.s-1],0.8544E-11,,
+Reverse chemical reaction coefficient [m4.mol-1.s-1],1.732E-16,,
+,,,
+# Initial conditions
+Initial concentration in positive core [mol.m-3],46478.28,,0.942 * c_max_p
+# Initial concentration in positive core [mol.m-3],13000,,
+,,,
+# Trapped lithium concentration in shell [mol.m-3],10953.48,,0.222 * c_max_p
+# Trapped lithium concentration in shell [mol.m-3],16000,,
+Trapped lithium concentration in shell [mol.m-3],20000,,
+# Trapped lithium concentration in shell [mol.m-3],9000,,
+Minimum concentration in positive core when fully charged [mol.m-3],10953.48,,0.222 * c_max_p
+Minimum concentration in negative particle when fully discharged [mol.m-3],68.514,,0.002 * c_max_n
+# for discharge
+# Initial concentration in positive core [mol.m-3],10953.48,,0.222 * c_max_p
+,,,
+# Initial oxygen concentration in positive shell [mol.m-3],1521.93,,
+Initial oxygen concentration in positive shell [mol.m-3],[function]initial_oxygen_concentration,,
+Constant oxygen concentration in particle core [mol.m-3],152193.21,,
+,,,
+# Initial phase boundary location [m],3.8E-6,,R_p
+Initial phase boundary location [m],3.75E-6,,
+# Initial phase boundary location [m],2.66E-6,,0.7 * R_p
+# Initial phase boundary location [m],1.9E-6,,0.5 * R_p
+,,,
+Threshold concentration for phase transition [mol.m-3],14802,,0.3 * c_max_p
+# Threshold concentration for phase transition [mol.m-3],900,,
+,,,
+# Shell resistance [ohm],0.072,,
+Positive electrode shell resistivity [Ohm.m],0e5, Safari 2009, 
+# Positive electrode shell resistivity [Ohm.m],1e6, Safari 2009, 
