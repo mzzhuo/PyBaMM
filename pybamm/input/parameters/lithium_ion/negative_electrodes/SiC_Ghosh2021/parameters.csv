@@ -2,8 +2,8 @@ Name [units],Value,Reference,Notes
 # Empty rows and rows starting with ‘#’ will be ignored,,,
 ,,,
 # Electrode properties,,,
-# Negative electrode conductivity [S.m-1],0.17,Sturm 2019,
-Negative electrode conductivity [S.m-1],215,Chen 2020,graphite
+Negative electrode conductivity [S.m-1],100,Sturm 2019,
+# Negative electrode conductivity [S.m-1],215,Chen 2020,graphite
 Maximum concentration in negative electrode [mol.m-3],34257,,
 Negative electrode diffusivity [m2.s-1],[function]sic_diffusivity,,
 Negative electrode OCP [V],[data]SiC_OCP,,
@@ -13,7 +13,7 @@ Negative electrode porosity,0.216,Sturm 2019,
 Negative electrode active material volume fraction,0.694,Sturm 2019,
 Negative particle radius [m],6.1e-6,,
 Negative electrode Bruggeman coefficient (electrolyte),1.5,Sturm 2019,theoretical
-# Negative electrode Bruggeman coefficient (electrode),1.5,default,
+Negative electrode Bruggeman coefficient (electrode),1.5,default,
 ,,,
 # Interfacial reactions,,,
 # Negative electrode cation signed stoichiometry,-1,,

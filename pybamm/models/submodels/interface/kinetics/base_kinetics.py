@@ -109,6 +109,7 @@ class BaseKinetics(BaseInterface):
                     "Total positive electrode interfacial current density variable"
                 ]
                 eta_shell = -j_tot * (pybamm.Scalar(1) - s) * R * R_shell
+                # eta_shell = -j_tot_av * (pybamm.Scalar(1) - s) * R * R_shell
             else:
                 eta_shell = pybamm.Scalar(0)
             eta_r += eta_shell

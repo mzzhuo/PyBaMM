@@ -76,6 +76,7 @@ class PeDegradationSingleParticle(BasePeDegradation):
         s_dot = ( 
             -(self.kappa_1 * self.k_1(T_xav) - self.kappa_2 * self.k_2(T_xav) * c_o_cent_av)
             * pybamm.EqualHeaviside(c_c_surf_av, self.c_p_thrd)
+            # * pybamm.sigmoid(c_c_surf_av, self.c_p_thrd, 10)
         ) 
         # s_dot = pybamm.Scalar(-0.07)
 

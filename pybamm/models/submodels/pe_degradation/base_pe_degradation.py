@@ -213,9 +213,10 @@ class BasePeDegradation(pybamm.BaseSubModel):
             "X-averaged positive shell center concentration of oxygen [mol.m-3]": c_o_cent_av * self.c_o_typ,
             # for moving phase boundary
             "Moving phase boundary location": s,
-            "Moving phase boundary location [m]": s * R_scale,
+            # dimensional s should be s * R (x) not R_scale
+            # "Moving phase boundary location [m]": s * R_scale,
             "X-averaged moving phase boundary location": s_xav,
-            "X-averaged moving phase boundary location [m]": s_xav * R_scale,
+            # "X-averaged moving phase boundary location [m]": s_xav * R_scale,
             # loss of active material (LAM) due to progressing of s
             # the shell is considered as LAM
             "Loss of active material in positive electrode (MZ)": lam_pe,

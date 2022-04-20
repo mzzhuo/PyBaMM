@@ -1,4 +1,4 @@
-#
+  #
 # BatchStudy class
 #
 import pybamm

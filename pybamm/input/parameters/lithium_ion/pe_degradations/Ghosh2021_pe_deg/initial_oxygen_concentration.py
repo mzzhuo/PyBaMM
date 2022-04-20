@@ -19,6 +19,7 @@ def initial_oxygen_concentration(x):
         initial oxygen concentration
     """
 
-    c_o_ini_ref = 1521.93
+    # c_o_ini_ref = 15219.321 
+    c_o_ini_ref = 0 
 
     return c_o_ini_ref * (1 - x ** 2)

@@ -80,6 +80,7 @@ class PeDegradationManyParticle(BasePeDegradation):
         s_dot = ( 
             -(self.kappa_1 * self.k_1(T) / R - self.kappa_2 * self.k_2(T) / R * c_o_cent)
             * pybamm.EqualHeaviside(c_c_surf, self.c_p_thrd)
+            # * pybamm.sigmoid(c_c_surf, self.c_p_thrd, 10)
         )
         # s_dot = pybamm.Scalar(-0.07)
 

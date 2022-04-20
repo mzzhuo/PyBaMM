@@ -484,7 +484,7 @@ class BaseBatteryModel(pybamm.BaseModel):
         if self.options["dimensionality"] == 2:
             base_var_pts.update({"x_n": 10, "x_s": 10, "x_p": 10})
         if self.options["PE degradation"] in ["yes", "on"]:
-            base_var_pts.update({eta: 20, chi: 20, psi: 20})
+            base_var_pts.update({"eta": 20, "chi": 20, "psi": 20})
         return base_var_pts
 
     @property
