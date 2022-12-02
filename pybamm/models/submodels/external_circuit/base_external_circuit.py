@@ -18,7 +18,8 @@ class BaseModel(pybamm.BaseSubModel):
             "Charge capacity [A.h]": -Q,
             # "Total charge throughput [A.h]": Q_thrpt
             # divided by "Nominal cell capacity [A.h]"
-            "SoC": -Q / self.param.Q,
+            "SoC_chg": -Q / self.param.Q,
+            "SoC_dis": 1 - Q / self.param.Q,
         }
         return variables
 

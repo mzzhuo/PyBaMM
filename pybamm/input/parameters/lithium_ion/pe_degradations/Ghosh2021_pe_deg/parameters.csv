@@ -18,9 +18,9 @@ Reverse chemical reaction coefficient [m4.mol-1.s-1],1.732E-16,,
 Initial concentration in positive core [mol.m-3],46478.28,,0.942 * c_max_p
 # Initial concentration in positive core [mol.m-3],13000,,
 ,,,
-# Trapped lithium concentration in shell [mol.m-3],10953.48,,0.222 * c_max_p
+Trapped lithium concentration in shell [mol.m-3],10953.48,,0.222 * c_max_p
 # Trapped lithium concentration in shell [mol.m-3],16000,,
-Trapped lithium concentration in shell [mol.m-3],20000,,
+# Trapped lithium concentration in shell [mol.m-3],20000,,
 # Trapped lithium concentration in shell [mol.m-3],9000,,
 Minimum concentration in positive core when fully charged [mol.m-3],10953.48,,0.222 * c_max_p
 Minimum concentration in negative particle when fully discharged [mol.m-3],68.514,,0.002 * c_max_n
